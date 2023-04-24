@@ -73,7 +73,7 @@ public class AwsCognitoKarafConfigurationFactory implements ManagedServiceFactor
 
 
     @Override
-    public void updated(String pid, Dictionary<String, ?> dictionary) throws ConfigurationException {
+    public void updated(String pid, Dictionary<String, ?> dictionary) {
         AwsCognitoKarafConfiguration awsCognitoKarafConfiguration;
         if (awsCognitoConfigurations.containsKey(pid)) {
             awsCognitoKarafConfiguration = awsCognitoConfigurations.get(pid);

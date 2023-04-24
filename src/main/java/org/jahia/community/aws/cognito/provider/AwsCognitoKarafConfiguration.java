@@ -56,9 +56,10 @@ public class AwsCognitoKarafConfiguration {
 
         awsCognitoUserGroupProvider.setKey(providerKey);
         awsCognitoUserGroupProvider.setAwsCognitoConfiguration(new AwsCognitoConfiguration(
-                (String) dictionary.get("target.site"),
-                (String) dictionary.get("organization"),
-                (String) dictionary.get("apiToken")));
+                (String) dictionary.get(AwsCognitoConfiguration.PROP_TARGET_SITE),
+                (String) dictionary.get(AwsCognitoConfiguration.PROP_KEY_ID),
+                (String) dictionary.get(AwsCognitoConfiguration.PROP_ACCESS_TOKEN),
+                (String) dictionary.get(AwsCognitoConfiguration.PROP_REGION)));
         // Activate (again)
         awsCognitoUserGroupProvider.register();
     }

@@ -5,7 +5,6 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
-import org.apache.commons.lang.StringUtils;
 import org.jahia.api.Constants;
 import org.jahia.community.aws.cognito.provider.client.AwsCognitoGroup;
 import org.jahia.community.aws.cognito.provider.client.AwsCognitoUser;
@@ -116,16 +115,13 @@ public class AwsCognitoCacheManager {
 
     public void cacheGroup(String providerKey, String siteKey, AwsCognitoGroup awsCognitoGroup) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Caching group ({}): {} in site {}", awsCognitoGroup.getId(), awsCognitoGroup.getName(), siteKey);
+            logger.debug("Caching group ({}): {} in site {}", awsCognitoGroup.getName(), awsCognitoGroup.getName(), siteKey);
         }
         Properties properties = new Properties();
         properties.put(Constants.JCR_TITLE, awsCognitoGroup.getName());
-        if (StringUtils.isNotBlank(awsCognitoGroup.getDescription())) {
-            properties.put(Constants.JCR_DESCRIPTION, awsCognitoGroup.getDescription());
-        }
-        awsCognitoGroup.setJahiaGroup(new JahiaGroupImpl(awsCognitoGroup.getId(), awsCognitoGroup.getId(), siteKey, properties));
+        awsCognitoGroup.setJahiaGroup(new JahiaGroupImpl(awsCognitoGroup.getName(), awsCognitoGroup.getName(), siteKey, properties));
         ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(awsCognitoGroup, AwsCognitoUserGroupProviderConfiguration.KEY);
-        groupCache.put(new Element(getCacheNameKey(providerKey, siteKey, awsCognitoGroup.getId()), cacheEntry));
+        groupCache.put(new Element(getCacheNameKey(providerKey, siteKey, awsCognitoGroup.getName()), cacheEntry));
     }
 
     private static String getCacheNameKey(String providerKey, String siteKey, String objectName) {

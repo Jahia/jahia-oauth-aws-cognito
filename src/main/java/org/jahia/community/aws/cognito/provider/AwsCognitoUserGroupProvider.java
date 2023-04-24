@@ -119,7 +119,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
 
         List<String> groups = new ArrayList<>();
         awsCognitoClientService.getMembership(awsCognitoConfiguration, userId).orElse(Collections.emptyList())
-                .forEach(group -> groups.add(group.getId()));
+                .forEach(group -> groups.add(group.getName()));
         awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, userId))
                 .ifPresent(u -> u.setGroups(groups));
         return Collections.unmodifiableList(groups);
@@ -168,14 +168,14 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
                 return Collections.emptyList();
             }
             return awsCognitoCacheManager.getOrRefreshGroup(getKey(), getSiteKey(), groupId, () -> awsCognitoClientService.getGroup(awsCognitoConfiguration, groupId))
-                    .map(awsCognitoGroup -> Collections.singletonList(awsCognitoGroup.getId()))
+                    .map(awsCognitoGroup -> Collections.singletonList(awsCognitoGroup.getName()))
                     .orElse(Collections.emptyList());
         }
 
         List<String> groupIds = new ArrayList<>();
         awsCognitoClientService.getGroups(awsCognitoConfiguration, offset, limit).orElse(Collections.emptyList())
                 .forEach(group -> {
-                    groupIds.add(group.getId());
+                    groupIds.add(group.getName());
                     awsCognitoCacheManager.cacheGroup(getKey(), getSiteKey(), group);
                 });
         return Collections.unmodifiableList(groupIds);
