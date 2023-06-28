@@ -85,17 +85,20 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
         if (parameters.containsKey("configName")) {
             properties.put("configName", parameters.get("configName"));
         }
-        if (parameters.containsKey("propValue." + AwsCognitoConfiguration.PROP_TARGET_SITE) && StringUtils.isNotBlank((String) parameters.get("propValue." + AwsCognitoConfiguration.PROP_TARGET_SITE))) {
-            properties.put(AwsCognitoConfiguration.PROP_TARGET_SITE, parameters.get("propValue." + AwsCognitoConfiguration.PROP_TARGET_SITE));
+        if (parameters.containsKey("propValue." + AwsCognitoConfiguration.TARGET_SITE) && StringUtils.isNotBlank((String) parameters.get("propValue." + AwsCognitoConfiguration.TARGET_SITE))) {
+            properties.put(AwsCognitoConfiguration.TARGET_SITE, parameters.get("propValue." + AwsCognitoConfiguration.TARGET_SITE));
         }
-        if (parameters.containsKey("propValue." + AwsCognitoConfiguration.PROP_KEY_ID)) {
-            properties.put(AwsCognitoConfiguration.PROP_KEY_ID, parameters.get("propValue." + AwsCognitoConfiguration.PROP_KEY_ID));
+        if (parameters.containsKey("propValue." + AwsCognitoConfiguration.ACCESS_KEY_ID)) {
+            properties.put(AwsCognitoConfiguration.ACCESS_KEY_ID, parameters.get("propValue." + AwsCognitoConfiguration.ACCESS_KEY_ID));
         }
-        if (parameters.containsKey("propValue." + AwsCognitoConfiguration.PROP_ACCESS_TOKEN)) {
-            properties.put(AwsCognitoConfiguration.PROP_ACCESS_TOKEN, parameters.get("propValue." + AwsCognitoConfiguration.PROP_ACCESS_TOKEN));
+        if (parameters.containsKey("propValue." + AwsCognitoConfiguration.SECRET_ACCESS_KEY)) {
+            properties.put(AwsCognitoConfiguration.SECRET_ACCESS_KEY, parameters.get("propValue." + AwsCognitoConfiguration.SECRET_ACCESS_KEY));
         }
-        if (parameters.containsKey("propValue." + AwsCognitoConfiguration.PROP_REGION)) {
-            properties.put(AwsCognitoConfiguration.PROP_REGION, parameters.get("propValue." + AwsCognitoConfiguration.PROP_REGION));
+        if (parameters.containsKey("propValue." + AwsCognitoConfiguration.REGION)) {
+            properties.put(AwsCognitoConfiguration.REGION, parameters.get("propValue." + AwsCognitoConfiguration.REGION));
+        }
+        if (parameters.containsKey("propValue." + AwsCognitoConfiguration.USER_POOL_ID)) {
+            properties.put(AwsCognitoConfiguration.USER_POOL_ID, parameters.get("propValue." + AwsCognitoConfiguration.USER_POOL_ID));
         }
         return properties;
     }

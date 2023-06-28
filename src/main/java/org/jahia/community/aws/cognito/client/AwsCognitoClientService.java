@@ -1,4 +1,4 @@
-package org.jahia.community.aws.cognito.provider.client;
+package org.jahia.community.aws.cognito.client;
 
 import org.apache.shiro.util.CollectionUtils;
 import org.jahia.community.aws.cognito.provider.AwsCognitoConfiguration;
@@ -38,13 +38,14 @@ public class AwsCognitoClientService {
     private static CognitoIdentityProviderClient getCognitoIdentityProviderClient(AwsCognitoConfiguration awsCognitoConfiguration) {
         return CognitoIdentityProviderClient.builder()
                 .region(Region.of(awsCognitoConfiguration.getRegion()))
-                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(awsCognitoConfiguration.getKeyId(), awsCognitoConfiguration.getAccessKey())))
+                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(awsCognitoConfiguration.getAccessKeyId(), awsCognitoConfiguration.getSecretAccessKey())))
                 .build();
     }
 
     public Optional<AwsCognitoUser> getUser(AwsCognitoConfiguration awsCognitoConfiguration, String username) {
         lock.lock();
         ListUsersRequest request = ListUsersRequest.builder()
+                .userPoolId(awsCognitoConfiguration.getUserPoolId())
                 .filter("username=" + username)
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
@@ -61,7 +62,7 @@ public class AwsCognitoClientService {
     public Optional<List<AwsCognitoUser>> getUsers(AwsCognitoConfiguration awsCognitoConfiguration, long offset, long limit) {
         lock.lock();
         ListUsersRequest request = ListUsersRequest.builder()
-                .limit((int) limit)
+                .userPoolId(awsCognitoConfiguration.getUserPoolId())
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListUsersResponse response = cognitoIdentityProviderClient.listUsers(request);
@@ -82,6 +83,7 @@ public class AwsCognitoClientService {
     public Optional<AwsCognitoGroup> getGroup(AwsCognitoConfiguration awsCognitoConfiguration, String groupName) {
         lock.lock();
         GetGroupRequest request = GetGroupRequest.builder()
+                .userPoolId(awsCognitoConfiguration.getUserPoolId())
                 .groupName(groupName)
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
@@ -98,7 +100,7 @@ public class AwsCognitoClientService {
     public Optional<List<AwsCognitoGroup>> getGroups(AwsCognitoConfiguration awsCognitoConfiguration, long offset, long limit) {
         lock.lock();
         ListGroupsRequest request = ListGroupsRequest.builder()
-                .limit((int) limit)
+                .userPoolId(awsCognitoConfiguration.getUserPoolId())
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListGroupsResponse response = cognitoIdentityProviderClient.listGroups(request);
@@ -114,6 +116,7 @@ public class AwsCognitoClientService {
     public Optional<List<AwsCognitoUser>> getGroupMembers(AwsCognitoConfiguration awsCognitoConfiguration, String groupName) {
         lock.lock();
         ListUsersInGroupRequest request = ListUsersInGroupRequest.builder()
+                .userPoolId(awsCognitoConfiguration.getUserPoolId())
                 .groupName(groupName)
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
@@ -130,6 +133,7 @@ public class AwsCognitoClientService {
     public Optional<List<AwsCognitoGroup>> getMembership(AwsCognitoConfiguration awsCognitoConfiguration, String username) {
         lock.lock();
         AdminListGroupsForUserRequest request = AdminListGroupsForUserRequest.builder()
+                .userPoolId(awsCognitoConfiguration.getUserPoolId())
                 .username(username)
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {

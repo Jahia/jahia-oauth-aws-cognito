@@ -1,4 +1,4 @@
-package org.jahia.community.aws.cognito.provider.client;
+package org.jahia.community.aws.cognito.client;
 
 import org.jahia.services.usermanager.JahiaGroupImpl;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.GroupType;

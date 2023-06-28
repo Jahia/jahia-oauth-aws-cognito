@@ -1,12 +1,11 @@
 package org.jahia.community.aws.cognito.provider;
 
-import org.jahia.community.aws.cognito.provider.client.AwsCognitoClientService;
+import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
 import org.jahia.modules.external.users.ExternalUserGroupService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

@@ -36,7 +36,6 @@
         pageContext.setAttribute("awsCognitoProperties", Collections.emptyMap());
     }
 %>
-<utility:logger level="info" value="AwsCognito: ${awsCognitoProperties}"/>
 <utility:setBundle basename="resources.jahia-aws-cognito-provider" var="bundle"/>
 <jcr:jqom statement="SELECT * FROM [jnt:virtualsite] WHERE ISCHILDNODE('/sites') AND localname() <> 'systemsite'"
           var="sites"/>
@@ -89,23 +88,45 @@
                 <div class="form-group">
                     <div class="col-md-4">
                         <label class="control-label">
-                            <fmt:message bundle="${bundle}" key="AwsCognitoConfiguration.organization"/>
+                            <fmt:message bundle="${bundle}" key="AwsCognitoConfiguration.accessKeyId"/>
                         </label>
                     </div>
                     <div class="col-md-8">
-                        <input type="text" name="propValue.organization" class="form-control"
-                               value="${awsCognitoProperties['organization']}"/>
+                        <input type="text" name="propValue.accessKeyId" class="form-control"
+                               value="${awsCognitoProperties['accessKeyId']}"/>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-md-4">
                         <label class="control-label">
-                            <fmt:message bundle="${bundle}" key="AwsCognitoConfiguration.apiToken"/>
+                            <fmt:message bundle="${bundle}" key="AwsCognitoConfiguration.secretAccessKey"/>
                         </label>
                     </div>
                     <div class="col-md-8">
-                        <input type="text" name="propValue.apiToken" class="form-control"
-                               value="${awsCognitoProperties['apiToken']}"/>
+                        <input type="text" name="propValue.secretAccessKey" class="form-control"
+                               value="${awsCognitoProperties['secretAccessKey']}"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-4">
+                        <label class="control-label">
+                            <fmt:message bundle="${bundle}" key="AwsCognitoConfiguration.region"/>
+                        </label>
+                    </div>
+                    <div class="col-md-8">
+                        <input type="text" name="propValue.region" class="form-control"
+                               value="${awsCognitoProperties['region']}"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-4">
+                        <label class="control-label">
+                            <fmt:message bundle="${bundle}" key="AwsCognitoConfiguration.userPoolId"/>
+                        </label>
+                    </div>
+                    <div class="col-md-8">
+                        <input type="text" name="propValue.userPoolId" class="form-control"
+                               value="${awsCognitoProperties['userPoolId']}"/>
                     </div>
                 </div>
             </div>

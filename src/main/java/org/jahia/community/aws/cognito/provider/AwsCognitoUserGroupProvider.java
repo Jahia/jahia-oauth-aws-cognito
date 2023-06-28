@@ -1,9 +1,9 @@
 package org.jahia.community.aws.cognito.provider;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.jahia.community.aws.cognito.provider.client.AwsCognitoClientService;
-import org.jahia.community.aws.cognito.provider.client.AwsCognitoGroup;
-import org.jahia.community.aws.cognito.provider.client.AwsCognitoUser;
+import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
+import org.jahia.community.aws.cognito.client.AwsCognitoGroup;
+import org.jahia.community.aws.cognito.client.AwsCognitoUser;
 import org.jahia.exceptions.JahiaRuntimeException;
 import org.jahia.modules.external.users.BaseUserGroupProvider;
 import org.jahia.modules.external.users.GroupNotFoundException;
