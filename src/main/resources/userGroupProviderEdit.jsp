@@ -103,7 +103,7 @@
                         </label>
                     </div>
                     <div class="col-md-8">
-                        <input type="text" name="propValue.secretAccessKey" class="form-control"
+                        <input type="password" name="propValue.secretAccessKey" class="form-control"
                                value="${awsCognitoProperties['secretAccessKey']}"/>
                     </div>
                 </div>
