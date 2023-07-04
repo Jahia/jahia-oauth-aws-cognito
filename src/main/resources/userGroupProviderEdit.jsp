@@ -36,7 +36,7 @@
         pageContext.setAttribute("awsCognitoProperties", Collections.emptyMap());
     }
 %>
-<utility:setBundle basename="resources.jahia-aws-cognito-provider" var="bundle"/>
+<utility:setBundle basename="resources.jahia-oauth-aws-cognito" var="bundle"/>
 <jcr:jqom statement="SELECT * FROM [jnt:virtualsite] WHERE ISCHILDNODE('/sites') AND localname() <> 'systemsite'"
           var="sites"/>
 <datalist id="sites">

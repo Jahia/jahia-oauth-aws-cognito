@@ -57,7 +57,7 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
     }
 
     public AwsCognitoUserGroupProviderConfiguration() {
-        moduleKey = "jahia-aws-cognito-provider";
+        moduleKey = "jahia-oauth-aws-cognito";
     }
 
     @Override

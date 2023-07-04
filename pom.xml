@@ -52,24 +52,25 @@
     <parent>
         <artifactId>jahia-modules</artifactId>
         <groupId>org.jahia.modules</groupId>
-        <version>8.1.6.0</version>
+        <version>8.1.3.0</version>
     </parent>
     <groupId>org.jahia.community</groupId>
-    <artifactId>jahia-aws-cognito-provider</artifactId>
-    <name>jahia-aws-cognito-provider</name>
+    <artifactId>jahia-oauth-aws-cognito</artifactId>
+    <name>jahia-oauth-aws-cognito</name>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <description>This is the custom module (jahia-aws-cognito-provider) for running on a Jahia server.</description>
-
+    <description>This is the custom module (jahia-oauth-aws-cognito) for running on a Jahia server.</description>
     <scm>
-        <connection>scm:dummy:uri</connection>
-        <developerConnection>scm:dummy:uri</developerConnection>
+        <connection>scm:git:git@github.com:Jahia/jahia-oauth-aws-cognito.git</connection>
+        <developerConnection>scm:git:git@github.com:Jahia/jahia-oauth-aws-cognito.git</developerConnection>
+        <url>https://github.com/Jahia/jahia-oauth-aws-cognito</url>
+        <tag>HEAD</tag>
     </scm>
     <properties>
+        <jahia-depends>default, jahia-authentication, jahia-oauth</jahia-depends>
         <jahia-module-type>system</jahia-module-type>
         <jahia-deploy-on-site>system</jahia-deploy-on-site>
     </properties>
-
 
     <repositories>
         <repository>
@@ -144,6 +145,23 @@
             <artifactId>bcpkix-jdk15on</artifactId>
             <version>1.70</version>
         </dependency>
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jahia.modules</groupId>
+            <artifactId>jahia-authentication</artifactId>
+            <version>1.7.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jahia.modules</groupId>
+            <artifactId>jahia-oauth</artifactId>
+            <version>3.3.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -157,6 +175,21 @@
                         <_dsannotations>*</_dsannotations>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>jahia-maven-plugin</artifactId>
+                <groupId>org.jahia.server</groupId>
+                <executions>
+                    <execution>
+                        <id>i18n2js</id>
+                        <goals>
+                            <goal>javascript-dictionary</goal>
+                        </goals>
+                        <configuration>
+                            <dictionaryName>jcauthawscognitoi18n</dictionaryName>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

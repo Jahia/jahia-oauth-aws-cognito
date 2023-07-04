@@ -1,10 +1,12 @@
 package org.jahia.community.aws.cognito.client;
 
+import org.jahia.api.Constants;
 import org.jahia.services.usermanager.JahiaGroupImpl;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.GroupType;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Properties;
 
 public class AwsCognitoGroup implements Serializable {
     private static final long serialVersionUID = 4349942162870561387L;
@@ -25,8 +27,11 @@ public class AwsCognitoGroup implements Serializable {
         return jahiaGroup;
     }
 
-    public void setJahiaGroup(JahiaGroupImpl jahiaGroup) {
-        this.jahiaGroup = jahiaGroup;
+    public String cacheGroup(String siteKey) {
+        Properties properties = new Properties();
+        properties.put(Constants.JCR_TITLE, name);
+        jahiaGroup = new JahiaGroupImpl(name, name, siteKey, properties);
+        return name;
     }
 
     public List<String> getMembers() {
