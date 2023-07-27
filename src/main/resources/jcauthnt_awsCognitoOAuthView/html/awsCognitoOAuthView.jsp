@@ -12,7 +12,8 @@
 <%--@elvariable id="renderContext" type="org.jahia.services.render.RenderContext"--%>
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
-<template:addResources type="javascript" resources="i18n/jahia-oauth-aws-cognito-i18n_${renderContext.UILocale}.js" var="i18nJSFile"/>
+<template:addResources type="javascript" resources="i18n/jahia-oauth-aws-cognito-i18n_${renderContext.UILocale}.js"
+                       var="i18nJSFile"/>
 <c:if test="${empty i18nJSFile}">
     <template:addResources type="javascript" resources="i18n/jahia-oauth-aws-cognito-i18n.js"/>
 </c:if>
@@ -45,7 +46,7 @@
             <div layout="row">
                 <md-input-container flex>
                     <label message-key="label.endpoint"></label>
-                    <input type="password" ng-model="awsCognito.endpoint" name="endpoint" required/>
+                    <input type="password" ng-model="awsCognito.endpoint" name="endpoint" disabled/>
                     <div ng-messages="awsCognitoForm.endpoint.$error" role="alert">
                         <div ng-message="required" message-key="error.endpoint.required"></div>
                     </div>
@@ -55,7 +56,7 @@
 
                 <md-input-container flex>
                     <label message-key="label.region"></label>
-                    <input type="text" ng-model="awsCognito.region" name="region" required/>
+                    <input type="text" ng-model="awsCognito.region" name="region" disabled/>
                     <div ng-messages="awsCognitoForm.region.$error" role="alert">
                         <div ng-message="required" message-key="error.region.required"></div>
                     </div>
@@ -64,7 +65,7 @@
             <div layout="row">
                 <md-input-container flex>
                     <label message-key="label.apiKey"></label>
-                    <input type="text" ng-model="awsCognito.apiKey" name="apiKey" required/>
+                    <input type="text" ng-model="awsCognito.apiKey" name="apiKey" disabled/>
                     <div ng-messages="awsCognitoForm.apiKey.$error" role="alert">
                         <div ng-message="required" message-key="error.apiKey.required"></div>
                     </div>
@@ -74,9 +75,29 @@
 
                 <md-input-container flex>
                     <label message-key="label.apiSecret"></label>
-                    <input type="password" ng-model="awsCognito.apiSecret" name="apiSecret" required/>
+                    <input type="password" ng-model="awsCognito.apiSecret" name="apiSecret" disabled/>
                     <div ng-messages="awsCognitoForm.apiSecret.$error" role="alert">
                         <div ng-message="required" message-key="error.apiSecret.required"></div>
+                    </div>
+                </md-input-container>
+            </div>
+
+            <div layout="row">
+                <md-input-container flex="25">
+                    <label message-key="label.secretKey"></label>
+                    <input type="password" ng-model="awsCognito.secretKey" name="secretKey" required/>
+                    <div ng-messages="awsCognitoForm.secretKey.$error" role="alert">
+                        <div ng-message="required" message-key="error.secretKey.required"></div>
+                    </div>
+                </md-input-container>
+
+                <div flex="5"></div>
+
+                <md-input-container flex="70">
+                    <label message-key="label.loginUrl"></label>
+                    <input type="text" ng-model="awsCognito.loginUrl" name="loginUrl" required/>
+                    <div ng-messages="awsCognitoForm.loginUrl.$error" role="alert">
+                        <div ng-message="required" message-key="error.loginUrl.required"></div>
                     </div>
                 </md-input-container>
             </div>

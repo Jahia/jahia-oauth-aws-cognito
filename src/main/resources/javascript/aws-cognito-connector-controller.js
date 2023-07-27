@@ -15,7 +15,7 @@
 
         vm.saveSettings = () => {
             // Value can't be empty
-            if (!vm.apiKey || !vm.apiSecret || !vm.endpoint || !vm.region) {
+            if (!vm.secretKey || !vm.loginUrl) {
                 helperService.errorToast(i18nService.message('label.missingMandatoryProperties'));
                 return false;
             }
@@ -25,10 +25,12 @@
                 connectorServiceName: CONNECTOR_SERVICE_NAME,
                 properties: {
                     enabled: vm.enabled,
-                    apiKey: vm.apiKey,
-                    apiSecret: vm.apiSecret,
+                    apiKey: 'AWS_COGNITO_API_KEY',
+                    apiSecret: 'AWS_COGNITO_API_KEY',
                     endpoint: vm.endpoint,
-                    region: vm.region
+                    region: vm.region,
+                    secretKey: vm.secretKey,
+                    loginUrl: vm.loginUrl
                 }
             }).success(() => {
                 vm.connectorHasSettings = true;
@@ -41,7 +43,7 @@
             vm.expandedCard = !vm.expandedCard;
         };
 
-        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'region']).success(data => {
+        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'secretKey', 'loginUrl']).success(data => {
             if (data && !angular.equals(data, {})) {
                 vm.connectorHasSettings = true;
                 vm.expandedCard = true;
@@ -50,6 +52,8 @@
                 vm.apiSecret = data.apiSecret;
                 vm.endpoint = data.endpoint;
                 vm.region = data.region;
+                vm.secretKey = data.secretKey;
+                vm.loginUrl = data.loginUrl;
             } else {
                 vm.connectorHasSettings = false;
                 vm.enabled = false;
