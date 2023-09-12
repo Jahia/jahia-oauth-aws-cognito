@@ -39,14 +39,19 @@
 
     <md-card-content layout="column" ng-show="awsCognito.expandedCard">
         <form name="awsCognitoForm">
-            <md-switch ng-model="awsCognito.enabled">
-                <span message-key="label.activate"></span>
-            </md-switch>
+            <div layout="row" layout-align="space-between center">
+                <md-switch ng-model="awsCognito.enabled">
+                    <span message-key="label.activate"></span>
+                </md-switch>
+                <md-switch ng-model="awsCognito.withCustomLogin">
+                    <span message-key="label.customLogin"></span>
+                </md-switch>
+            </div>
 
-            <div layout="row">
+            <div layout="row" ng-show="!awsCognito.withCustomLogin">
                 <md-input-container flex>
                     <label message-key="label.endpoint"></label>
-                    <input type="password" ng-model="awsCognito.endpoint" name="endpoint" disabled/>
+                    <input type="password" ng-model="awsCognito.endpoint" name="endpoint"/>
                     <div ng-messages="awsCognitoForm.endpoint.$error" role="alert">
                         <div ng-message="required" message-key="error.endpoint.required"></div>
                     </div>
@@ -56,16 +61,16 @@
 
                 <md-input-container flex>
                     <label message-key="label.region"></label>
-                    <input type="text" ng-model="awsCognito.region" name="region" disabled/>
+                    <input type="text" ng-model="awsCognito.region" name="region"/>
                     <div ng-messages="awsCognitoForm.region.$error" role="alert">
                         <div ng-message="required" message-key="error.region.required"></div>
                     </div>
                 </md-input-container>
             </div>
-            <div layout="row">
+            <div layout="row" ng-show="!awsCognito.withCustomLogin">
                 <md-input-container flex>
                     <label message-key="label.apiKey"></label>
-                    <input type="text" ng-model="awsCognito.apiKey" name="apiKey" disabled/>
+                    <input type="text" ng-model="awsCognito.apiKey" name="apiKey"/>
                     <div ng-messages="awsCognitoForm.apiKey.$error" role="alert">
                         <div ng-message="required" message-key="error.apiKey.required"></div>
                     </div>
@@ -75,14 +80,14 @@
 
                 <md-input-container flex>
                     <label message-key="label.apiSecret"></label>
-                    <input type="password" ng-model="awsCognito.apiSecret" name="apiSecret" disabled/>
+                    <input type="password" ng-model="awsCognito.apiSecret" name="apiSecret"/>
                     <div ng-messages="awsCognitoForm.apiSecret.$error" role="alert">
                         <div ng-message="required" message-key="error.apiSecret.required"></div>
                     </div>
                 </md-input-container>
             </div>
 
-            <div layout="row">
+            <div layout="row" ng-show="awsCognito.withCustomLogin">
                 <md-input-container flex="25">
                     <label message-key="label.secretKey"></label>
                     <input type="password" ng-model="awsCognito.secretKey" name="secretKey" required/>
@@ -104,6 +109,9 @@
         </form>
 
         <md-card-actions layout="row" layout-align="end center">
+            <md-button class="md-accent" message-key="label.mappers"
+                       ng-click="awsCognito.goToMappers()" ng-show="awsCognito.connectorHasSettings">
+            </md-button>
             <md-button class="md-accent" message-key="label.save" ng-click="awsCognito.saveSettings()"></md-button>
         </md-card-actions>
     </md-card-content>

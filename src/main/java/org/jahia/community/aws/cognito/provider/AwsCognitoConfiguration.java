@@ -7,6 +7,7 @@ public class AwsCognitoConfiguration {
     public static final String REGION = "region";
     public static final String USER_POOL_ID = "userPoolId";
     public static final String SECRET_KEY = "secretKey";
+    public static final String WITH_CUSTOM_LOGIN = "withCustomLogin";
     public static final String LOGIN_URL = "loginUrl";
 
     private final String targetSite;

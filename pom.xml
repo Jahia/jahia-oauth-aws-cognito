@@ -65,8 +65,6 @@
     </scm>
     <properties>
         <jahia-depends>default, jahia-authentication, jahia-oauth</jahia-depends>
-        <jahia-module-type>system</jahia-module-type>
-        <jahia-deploy-on-site>system</jahia-deploy-on-site>
     </properties>
 
     <repositories>

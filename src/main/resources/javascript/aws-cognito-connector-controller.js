@@ -15,7 +15,11 @@
 
         vm.saveSettings = () => {
             // Value can't be empty
-            if (!vm.secretKey || !vm.loginUrl) {
+            if (!vm.withCustomLogin && (!vm.apiKey || !vm.apiSecret || !vm.endpoint || !vm.region)) {
+                helperService.errorToast(i18nService.message('label.missingMandatoryProperties'));
+                return false;
+            }
+            if (vm.withCustomLogin && (!vm.secretKey || !vm.loginUrl)) {
                 helperService.errorToast(i18nService.message('label.missingMandatoryProperties'));
                 return false;
             }
@@ -25,11 +29,12 @@
                 connectorServiceName: CONNECTOR_SERVICE_NAME,
                 properties: {
                     enabled: vm.enabled,
-                    apiKey: 'AWS_COGNITO_API_KEY',
-                    apiSecret: 'AWS_COGNITO_API_KEY',
+                    apiKey: vm.apiKey || 'AWS_COGNITO_API_KEY',
+                    apiSecret: vm.apiSecret || 'AWS_COGNITO_API_SECRET',
                     endpoint: vm.endpoint,
                     region: vm.region,
                     secretKey: vm.secretKey,
+                    withCustomLogin: vm.withCustomLogin,
                     loginUrl: vm.loginUrl
                 }
             }).success(() => {
@@ -39,11 +44,15 @@
                 helperService.errorToast(`${i18nService.message('jcauthnt_awsCognitoOAuthView')}: ${data.error}`);
             });
         };
+        vm.goToMappers = () => {
+            // the second part of the path must be the service name
+            $location.path(`/mappers/${CONNECTOR_SERVICE_NAME}`);
+        };
         vm.toggleCard = () => {
             vm.expandedCard = !vm.expandedCard;
         };
 
-        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'secretKey', 'loginUrl']).success(data => {
+        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'region', 'secretKey', 'withCustomLogin', 'loginUrl']).success(data => {
             if (data && !angular.equals(data, {})) {
                 vm.connectorHasSettings = true;
                 vm.expandedCard = true;
@@ -53,6 +62,7 @@
                 vm.endpoint = data.endpoint;
                 vm.region = data.region;
                 vm.secretKey = data.secretKey;
+                vm.withCustomLogin = data.withCustomLogin === 'true';
                 vm.loginUrl = data.loginUrl;
             } else {
                 vm.connectorHasSettings = false;

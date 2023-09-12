@@ -1,8 +1,10 @@
 package org.jahia.community.aws.cognito.jaxrs;
 
 import org.jahia.api.Constants;
+import org.jahia.api.content.JCRTemplate;
 import org.jahia.api.usermanager.JahiaUserManagerService;
 import org.jahia.community.aws.cognito.connector.AwsCognitoConnector;
+import org.jahia.community.aws.cognito.connector.AwsCognitoLoginUrlProvider;
 import org.jahia.community.aws.cognito.provider.AwsCognitoConfiguration;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
 import org.jahia.modules.jahiaauth.service.SettingsService;
@@ -43,9 +45,14 @@ public class AwsCognitoEndpoint {
     @GET
     public Response getData(@QueryParam("user") String body, @Context HttpServletRequest httpServletRequest) {
         try {
-            ConnectorConfig connectorConfig = BundleUtils.getOsgiService(SettingsService.class, null).getConnectorConfig(JahiaSitesService.SYSTEM_SITE_KEY, AwsCognitoConnector.KEY);
+            String siteKey = AwsCognitoLoginUrlProvider.getSiteKey(httpServletRequest, BundleUtils.getOsgiService(JCRTemplate.class, null), BundleUtils.getOsgiService(JahiaSitesService.class, null));
+            if (siteKey == null) {
+                logger.warn("Site not found.");
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            ConnectorConfig connectorConfig = BundleUtils.getOsgiService(SettingsService.class, null).getConnectorConfig(siteKey, AwsCognitoConnector.KEY);
             if (connectorConfig == null) {
-                logger.warn("The systemsite doesn't have the AWS Cognito configuration");
+                logger.warn("The site {} doesn't have the AWS Cognito configuration", siteKey);
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
             String secretKey = connectorConfig.getProperty(AwsCognitoConfiguration.SECRET_KEY);
@@ -53,7 +60,11 @@ public class AwsCognitoEndpoint {
             if (!login(subject, httpServletRequest)) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
-            return Response.seeOther(URI.create("/")).build();
+            String returnUrl = (String) httpServletRequest.getSession(false).getAttribute(AwsCognitoLoginUrlProvider.SESSION_OAUTH_AWS_COGNITO_RETURN_URL);
+            if (returnUrl == null) {
+                returnUrl = "/";
+            }
+            return Response.seeOther(URI.create(returnUrl)).build();
         } catch (Exception e) {
             logger.warn("", e);
             return Response.status(Response.Status.NOT_FOUND).build();
