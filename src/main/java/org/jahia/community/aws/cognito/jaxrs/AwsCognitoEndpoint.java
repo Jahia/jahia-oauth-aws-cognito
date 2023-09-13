@@ -50,10 +50,16 @@ public class AwsCognitoEndpoint {
                 logger.warn("Site not found.");
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
-            ConnectorConfig connectorConfig = BundleUtils.getOsgiService(SettingsService.class, null).getConnectorConfig(siteKey, AwsCognitoConnector.KEY);
+            SettingsService settingsService = BundleUtils.getOsgiService(SettingsService.class, null);
+            ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConnector.KEY);
             if (connectorConfig == null) {
-                logger.warn("The site {} doesn't have the AWS Cognito configuration", siteKey);
-                return Response.status(Response.Status.NOT_FOUND).build();
+                // fallback to systemsite
+                connectorConfig = settingsService.getConnectorConfig(JahiaSitesService.SYSTEM_SITE_KEY, AwsCognitoConnector.KEY);
+                if (connectorConfig == null) {
+                    // no configuration found
+                    logger.warn("The site {} doesn't have the AWS Cognito configuration", siteKey);
+                    return Response.status(Response.Status.NOT_FOUND).build();
+                }
             }
             String secretKey = connectorConfig.getProperty(AwsCognitoConfiguration.SECRET_KEY);
             String subject = decryptUser(body, secretKey);
