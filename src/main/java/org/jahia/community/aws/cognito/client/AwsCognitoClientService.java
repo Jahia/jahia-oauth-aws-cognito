@@ -66,6 +66,12 @@ public class AwsCognitoClientService {
                 return Optional.empty();
             }
             return Optional.of(new AwsCognitoUser(response.users().get(0)));
+        } catch (Exception e) {
+            logger.warn("Unable to get user: {}", username);
+            if (logger.isDebugEnabled()) {
+                logger.debug("", e);
+            }
+            return Optional.empty();
         } finally {
             lock.unlock();
         }
@@ -82,6 +88,12 @@ public class AwsCognitoClientService {
                 return Optional.empty();
             }
             return Optional.of(response.users().stream().map(AwsCognitoUser::new).collect(Collectors.toList()));
+        } catch (Exception e) {
+            logger.warn("Unable to get users");
+            if (logger.isDebugEnabled()) {
+                logger.debug("", e);
+            }
+            return Optional.empty();
         } finally {
             lock.unlock();
         }
@@ -104,6 +116,12 @@ public class AwsCognitoClientService {
                 return Optional.empty();
             }
             return Optional.of(new AwsCognitoGroup(response.group()));
+        } catch (Exception e) {
+            logger.warn("Unable to get group: {}", groupName);
+            if (logger.isDebugEnabled()) {
+                logger.debug("", e);
+            }
+            return Optional.empty();
         } finally {
             lock.unlock();
         }
@@ -120,6 +138,12 @@ public class AwsCognitoClientService {
                 return Optional.empty();
             }
             return Optional.of(response.groups().stream().map(AwsCognitoGroup::new).collect(Collectors.toList()));
+        } catch (Exception e) {
+            logger.warn("Unable to get groups");
+            if (logger.isDebugEnabled()) {
+                logger.debug("", e);
+            }
+            return Optional.empty();
         } finally {
             lock.unlock();
         }
@@ -137,6 +161,12 @@ public class AwsCognitoClientService {
                 return Optional.empty();
             }
             return Optional.of(response.users().stream().map(AwsCognitoUser::new).collect(Collectors.toList()));
+        } catch (Exception e) {
+            logger.warn("Unable to get group {} members", groupName);
+            if (logger.isDebugEnabled()) {
+                logger.debug("", e);
+            }
+            return Optional.empty();
         } finally {
             lock.unlock();
         }
@@ -154,6 +184,12 @@ public class AwsCognitoClientService {
                 return Optional.empty();
             }
             return Optional.of(response.groups().stream().map(AwsCognitoGroup::new).collect(Collectors.toList()));
+        } catch (Exception e) {
+            logger.warn("Unable to get membership for user: {}", username);
+            if (logger.isDebugEnabled()) {
+                logger.debug("", e);
+            }
+            return Optional.empty();
         } finally {
             lock.unlock();
         }
