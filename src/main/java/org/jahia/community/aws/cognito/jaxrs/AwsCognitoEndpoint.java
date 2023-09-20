@@ -1,18 +1,14 @@
 package org.jahia.community.aws.cognito.jaxrs;
 
-import org.jahia.api.Constants;
 import org.jahia.api.content.JCRTemplate;
-import org.jahia.api.usermanager.JahiaUserManagerService;
+import org.jahia.community.aws.cognito.api.AwsCustomLoginService;
 import org.jahia.community.aws.cognito.connector.AwsCognitoConnector;
 import org.jahia.community.aws.cognito.connector.AwsCognitoLoginUrlProvider;
 import org.jahia.community.aws.cognito.provider.AwsCognitoConfiguration;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
 import org.jahia.modules.jahiaauth.service.SettingsService;
 import org.jahia.osgi.BundleUtils;
-import org.jahia.params.valves.LoginEngineAuthValveImpl;
-import org.jahia.services.content.decorator.JCRUserNode;
 import org.jahia.services.sites.JahiaSitesService;
-import org.jahia.services.usermanager.JahiaUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,9 +59,15 @@ public class AwsCognitoEndpoint {
             }
             String secretKey = connectorConfig.getProperty(AwsCognitoConfiguration.SECRET_KEY);
             String subject = decryptUser(body, secretKey);
-            if (!login(subject, httpServletRequest)) {
+
+            AwsCustomLoginService awsCustomLoginService = BundleUtils.getOsgiService(AwsCustomLoginService.class, null);
+            if (awsCustomLoginService == null) {
+                logger.warn("No AWS custom login service to login the user: {}", subject);
+            }
+            if (awsCustomLoginService != null && !awsCustomLoginService.login(subject, httpServletRequest)) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
+
             String returnUrl = (String) httpServletRequest.getSession(false).getAttribute(AwsCognitoLoginUrlProvider.SESSION_OAUTH_AWS_COGNITO_RETURN_URL);
             if (returnUrl == null) {
                 returnUrl = "/";
@@ -105,21 +107,5 @@ public class AwsCognitoEndpoint {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(Arrays.copyOfRange(generatedData, 0, 32), "AES"), new IvParameterSpec(Arrays.copyOfRange(generatedData, 32, 32 + 16)));
         return new String(cipher.doFinal(encrypted), StandardCharsets.UTF_8);
-    }
-
-    private static boolean login(String userIdentifier, HttpServletRequest httpServletRequest) {
-        JCRUserNode jcrUserNode = BundleUtils.getOsgiService(JahiaUserManagerService.class, null).lookupUser(userIdentifier);
-        if (jcrUserNode != null) {
-            JahiaUser jahiaUser = jcrUserNode.getJahiaUser();
-            httpServletRequest.getSession().invalidate();
-            // user has been successfully authenticated, note this in the current session.
-            httpServletRequest.getSession().setAttribute(Constants.SESSION_USER, jahiaUser);
-            // eventually set the Jahia user
-            httpServletRequest.setAttribute(LoginEngineAuthValveImpl.VALVE_RESULT, LoginEngineAuthValveImpl.OK);
-            return true;
-        } else {
-            logger.warn("Login failed (user {} not found in JCR).", userIdentifier);
-            return false;
-        }
     }
 }
