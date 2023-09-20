@@ -5,8 +5,7 @@ import org.jahia.api.content.JCRTemplate;
 import org.jahia.bin.Action;
 import org.jahia.bin.ActionResult;
 import org.jahia.bin.Render;
-import org.jahia.community.aws.cognito.connector.AwsCognitoConnector;
-import org.jahia.community.aws.cognito.connector.AwsCognitoLoginUrlProvider;
+import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
 import org.jahia.modules.jahiaauth.service.SettingsService;
 import org.jahia.modules.jahiaoauth.service.JahiaOAuthService;
@@ -72,9 +71,9 @@ public class AwsCognitoCallbackAction extends Action {
 
             try {
                 String siteKey = renderContext.getSite().getSiteKey();
-                ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConnector.KEY);
+                ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConstants.KEY);
                 jahiaOAuthService.extractAccessTokenAndExecuteMappers(connectorConfig, token, httpServletRequest.getRequestedSessionId());
-                String returnUrl = (String) httpServletRequest.getSession(false).getAttribute(AwsCognitoLoginUrlProvider.SESSION_OAUTH_AWS_COGNITO_RETURN_URL);
+                String returnUrl = (String) httpServletRequest.getSession(false).getAttribute(AwsCognitoConstants.SESSION_OAUTH_AWS_COGNITO_RETURN_URL);
                 if (StringUtils.isBlank(returnUrl)) {
                     returnUrl = jcrTemplate.doExecuteWithSystemSessionAsUser(null, renderContext.getWorkspace(), renderContext.getMainResourceLocale(), systemSession ->
                             jahiaSitesService.getSiteByKey(siteKey, systemSession).getHome().getUrl());

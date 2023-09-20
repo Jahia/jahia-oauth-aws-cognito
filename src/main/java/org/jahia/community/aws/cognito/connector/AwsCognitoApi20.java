@@ -1,6 +1,7 @@
 package org.jahia.community.aws.cognito.connector;
 
 import com.github.scribejava.core.builder.api.DefaultApi20;
+import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -21,11 +22,11 @@ public final class AwsCognitoApi20 extends DefaultApi20 {
 
     @Override
     public String getAccessTokenEndpoint() {
-        return String.format(AwsCognitoConnector.URL, endpoint, region) + "/token";
+        return String.format(AwsCognitoConstants.URL, endpoint, region) + "/oauth2/token";
     }
 
     @Override
     protected String getAuthorizationBaseUrl() {
-        return String.format(AwsCognitoConnector.URL, endpoint, region) + "/authorize";
+        return String.format(AwsCognitoConstants.URL, endpoint, region) + "/oauth2/authorize";
     }
 }

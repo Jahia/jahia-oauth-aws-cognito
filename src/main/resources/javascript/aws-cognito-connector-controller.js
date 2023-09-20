@@ -38,8 +38,7 @@
                     loginUrl: vm.loginUrl,
                     accessKeyId: vm.accessKeyId,
                     secretAccessKey: vm.secretAccessKey,
-                    userPoolId: vm.userPoolId,
-                    withCustomLogout: vm.withCustomLogout
+                    userPoolId: vm.userPoolId
                 }
             }).success(() => {
                 vm.connectorHasSettings = true;
@@ -56,7 +55,7 @@
             vm.expandedCard = !vm.expandedCard;
         };
 
-        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'region', 'withCustomLogin', 'secretKey', 'loginUrl', 'accessKeyId', 'secretAccessKey', 'userPoolId', 'withCustomLogout']).success(data => {
+        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'region', 'withCustomLogin', 'secretKey', 'loginUrl', 'accessKeyId', 'secretAccessKey', 'userPoolId']).success(data => {
             if (data && !angular.equals(data, {})) {
                 vm.connectorHasSettings = true;
                 vm.expandedCard = true;
@@ -71,7 +70,6 @@
                 vm.accessKeyId = data.accessKeyId;
                 vm.secretAccessKey = data.secretAccessKey;
                 vm.userPoolId = data.userPoolId;
-                vm.withCustomLogout = data.withCustomLogout === 'true';
             } else {
                 vm.connectorHasSettings = false;
                 vm.enabled = false;
