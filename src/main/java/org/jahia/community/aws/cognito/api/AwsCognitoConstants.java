@@ -9,6 +9,5 @@ public final class AwsCognitoConstants {
     public static final String USER_PROPERTY_LASTNAME = "j:lastName";
     public static final String USER_PROPERTY_EMAIL = "j:email";
     public static final String USER_PROPERTY_ACCOUNTLOCKED = "j:accountLocked";
-    public static final String USER_PROPERTY_ENABLED = "enabled";
-    public static final String USER_PROPERTY_CONFIRMED = "confirmed";
+    public static final String USER_PROPERTY_STATUS = "status";
 }

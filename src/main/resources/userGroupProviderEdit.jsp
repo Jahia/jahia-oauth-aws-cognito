@@ -110,17 +110,6 @@
                 <div class="form-group">
                     <div class="col-md-4">
                         <label class="control-label">
-                            <fmt:message bundle="${bundle}" key="AwsCognitoConfiguration.region"/>
-                        </label>
-                    </div>
-                    <div class="col-md-8">
-                        <input type="text" name="propValue.region" class="form-control"
-                               value="${awsCognitoProperties['region']}"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-4">
-                        <label class="control-label">
                             <fmt:message bundle="${bundle}" key="AwsCognitoConfiguration.userPoolId"/>
                         </label>
                     </div>

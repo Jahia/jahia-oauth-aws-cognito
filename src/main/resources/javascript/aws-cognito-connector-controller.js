@@ -19,7 +19,7 @@
                 helperService.errorToast(i18nService.message('label.missingMandatoryProperties'));
                 return false;
             }
-            if (vm.withCustomLogin && (!vm.secretKey || !vm.loginUrl)) {
+            if (vm.withCustomLogin && (!vm.secretKey || !vm.loginUrl || !vm.accessKeyId || !vm.secretAccessKey || !vm.userPoolId)) {
                 helperService.errorToast(i18nService.message('label.missingMandatoryProperties'));
                 return false;
             }
@@ -33,9 +33,13 @@
                     apiSecret: vm.apiSecret || 'AWS_COGNITO_API_SECRET',
                     endpoint: vm.endpoint,
                     region: vm.region,
-                    secretKey: vm.secretKey,
                     withCustomLogin: vm.withCustomLogin,
-                    loginUrl: vm.loginUrl
+                    secretKey: vm.secretKey,
+                    loginUrl: vm.loginUrl,
+                    accessKeyId: vm.accessKeyId,
+                    secretAccessKey: vm.secretAccessKey,
+                    userPoolId: vm.userPoolId,
+                    withCustomLogout: vm.withCustomLogout
                 }
             }).success(() => {
                 vm.connectorHasSettings = true;
@@ -52,7 +56,7 @@
             vm.expandedCard = !vm.expandedCard;
         };
 
-        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'region', 'secretKey', 'withCustomLogin', 'loginUrl']).success(data => {
+        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'region', 'withCustomLogin', 'secretKey', 'loginUrl', 'accessKeyId', 'secretAccessKey', 'userPoolId', 'withCustomLogout']).success(data => {
             if (data && !angular.equals(data, {})) {
                 vm.connectorHasSettings = true;
                 vm.expandedCard = true;
@@ -61,9 +65,13 @@
                 vm.apiSecret = data.apiSecret;
                 vm.endpoint = data.endpoint;
                 vm.region = data.region;
-                vm.secretKey = data.secretKey;
                 vm.withCustomLogin = data.withCustomLogin === 'true';
+                vm.secretKey = data.secretKey;
                 vm.loginUrl = data.loginUrl;
+                vm.accessKeyId = data.accessKeyId;
+                vm.secretAccessKey = data.secretAccessKey;
+                vm.userPoolId = data.userPoolId;
+                vm.withCustomLogout = data.withCustomLogout === 'true';
             } else {
                 vm.connectorHasSettings = false;
                 vm.enabled = false;

@@ -106,6 +106,41 @@
                     </div>
                 </md-input-container>
             </div>
+            <div layout="row" ng-show="awsCognito.withCustomLogin">
+                <md-input-container flex="25">
+                    <label message-key="label.accessKeyId"></label>
+                    <input type="text" ng-model="awsCognito.accessKeyId" name="accessKeyId" required/>
+                    <div ng-messages="awsCognitoForm.accessKeyId.$error" role="alert">
+                        <div ng-message="required" message-key="error.accessKeyId.required"></div>
+                    </div>
+                </md-input-container>
+
+                <div flex="5"></div>
+
+                <md-input-container flex="70">
+                    <label message-key="label.secretAccessKey"></label>
+                    <input type="password" ng-model="awsCognito.secretAccessKey" name="secretAccessKey" required/>
+                    <div ng-messages="awsCognitoForm.secretAccessKey.$error" role="alert">
+                        <div ng-message="required" message-key="error.secretAccessKey.required"></div>
+                    </div>
+                </md-input-container>
+
+                <div flex="5"></div>
+
+                <md-input-container flex="70">
+                    <label message-key="label.userPoolId"></label>
+                    <input type="text" ng-model="awsCognito.userPoolId" name="userPoolId" required/>
+                    <div ng-messages="awsCognitoForm.userPoolId.$error" role="alert">
+                        <div ng-message="required" message-key="error.userPoolId.required"></div>
+                    </div>
+                </md-input-container>
+            </div>
+
+            <div layout="row" layout-align="end center">
+                <md-switch ng-model="awsCognito.withCustomLogout">
+                    <span message-key="label.customLogout"></span>
+                </md-switch>
+            </div>
         </form>
 
         <md-card-actions layout="row" layout-align="end center">

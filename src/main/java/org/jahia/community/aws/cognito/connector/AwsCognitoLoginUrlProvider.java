@@ -3,7 +3,7 @@ package org.jahia.community.aws.cognito.connector;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.api.Constants;
 import org.jahia.api.content.JCRTemplate;
-import org.jahia.community.aws.cognito.provider.AwsCognitoConfiguration;
+import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
 import org.jahia.modules.jahiaauth.service.JahiaAuthConstants;
 import org.jahia.modules.jahiaauth.service.SettingsService;

@@ -1,6 +1,7 @@
 package org.jahia.community.aws.cognito.jaxrs;
 
 import org.jahia.api.usermanager.JahiaUserManagerService;
+import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.jahia.community.aws.cognito.api.AwsCustomLoginService;
 import org.jahia.osgi.BundleUtils;
 import org.jahia.params.valves.LoginEngineAuthValveImpl;
@@ -17,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 public class AwsCustomLoginServiceImpl implements AwsCustomLoginService {
     private static final Logger logger = LoggerFactory.getLogger(AwsCustomLoginServiceImpl.class);
 
-    public boolean login(String userIdentifier, HttpServletRequest httpServletRequest) {
+    public boolean login(String userIdentifier, HttpServletRequest httpServletRequest, String siteKey, AwsCognitoConfiguration awsCognitoConfiguration) {
         JCRUserNode jcrUserNode = BundleUtils.getOsgiService(JahiaUserManagerService.class, null).lookupUser(userIdentifier);
         if (jcrUserNode != null) {
             JahiaUser jahiaUser = jcrUserNode.getJahiaUser();

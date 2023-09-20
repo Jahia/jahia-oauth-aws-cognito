@@ -1,6 +1,7 @@
 package org.jahia.community.aws.cognito.provider;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
 import org.jahia.community.aws.cognito.client.AwsCognitoGroup;
 import org.jahia.community.aws.cognito.client.AwsCognitoUser;

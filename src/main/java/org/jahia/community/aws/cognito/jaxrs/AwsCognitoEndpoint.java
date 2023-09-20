@@ -1,10 +1,11 @@
 package org.jahia.community.aws.cognito.jaxrs;
 
+import org.apache.commons.lang.StringUtils;
 import org.jahia.api.content.JCRTemplate;
+import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.jahia.community.aws.cognito.api.AwsCustomLoginService;
 import org.jahia.community.aws.cognito.connector.AwsCognitoConnector;
 import org.jahia.community.aws.cognito.connector.AwsCognitoLoginUrlProvider;
-import org.jahia.community.aws.cognito.provider.AwsCognitoConfiguration;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
 import org.jahia.modules.jahiaauth.service.SettingsService;
 import org.jahia.osgi.BundleUtils;
@@ -38,6 +39,35 @@ import java.util.Base64;
 public class AwsCognitoEndpoint {
     private static final Logger logger = LoggerFactory.getLogger(AwsCognitoEndpoint.class);
 
+    private static AwsCognitoConfiguration getAwsCognitoConfiguration(HttpServletRequest httpServletRequest) {
+        String siteKey = AwsCognitoLoginUrlProvider.getSiteKey(httpServletRequest, BundleUtils.getOsgiService(JCRTemplate.class, null), BundleUtils.getOsgiService(JahiaSitesService.class, null));
+        if (siteKey == null) {
+            logger.warn("Site not found.");
+            return null;
+        }
+        ConnectorConfig connectorConfig = getConnectorConfig(siteKey);
+        if (connectorConfig == null) {
+            logger.warn("The site {} doesn't have the AWS Cognito configuration", siteKey);
+            return null;
+        }
+        return new AwsCognitoConfiguration(
+                null,
+                connectorConfig.getProperty(AwsCognitoConfiguration.ACCESS_KEY_ID),
+                connectorConfig.getProperty(AwsCognitoConfiguration.SECRET_ACCESS_KEY),
+                connectorConfig.getProperty(AwsCognitoConfiguration.USER_POOL_ID)
+        );
+    }
+
+    private static ConnectorConfig getConnectorConfig(String siteKey) {
+        SettingsService settingsService = BundleUtils.getOsgiService(SettingsService.class, null);
+        ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConnector.KEY);
+        if (connectorConfig == null) {
+            // fallback to systemsite
+            connectorConfig = settingsService.getConnectorConfig(JahiaSitesService.SYSTEM_SITE_KEY, AwsCognitoConnector.KEY);
+        }
+        return connectorConfig;
+    }
+
     @GET
     public Response getData(@QueryParam("user") String body, @Context HttpServletRequest httpServletRequest) {
         try {
@@ -46,25 +76,27 @@ public class AwsCognitoEndpoint {
                 logger.warn("Site not found.");
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
-            SettingsService settingsService = BundleUtils.getOsgiService(SettingsService.class, null);
-            ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConnector.KEY);
+            ConnectorConfig connectorConfig = getConnectorConfig(siteKey);
             if (connectorConfig == null) {
-                // fallback to systemsite
-                connectorConfig = settingsService.getConnectorConfig(JahiaSitesService.SYSTEM_SITE_KEY, AwsCognitoConnector.KEY);
-                if (connectorConfig == null) {
-                    // no configuration found
-                    logger.warn("The site {} doesn't have the AWS Cognito configuration", siteKey);
-                    return Response.status(Response.Status.NOT_FOUND).build();
-                }
+                // no configuration found
+                logger.warn("The site {} doesn't have the AWS Cognito configuration", siteKey);
+                return Response.status(Response.Status.NOT_FOUND).build();
             }
             String secretKey = connectorConfig.getProperty(AwsCognitoConfiguration.SECRET_KEY);
             String subject = decryptUser(body, secretKey);
+            if (subject == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
 
             AwsCustomLoginService awsCustomLoginService = BundleUtils.getOsgiService(AwsCustomLoginService.class, null);
             if (awsCustomLoginService == null) {
                 logger.warn("No AWS custom login service to login the user: {}", subject);
             }
-            if (awsCustomLoginService != null && !awsCustomLoginService.login(subject, httpServletRequest)) {
+            AwsCognitoConfiguration awsCognitoConfiguration = getAwsCognitoConfiguration(httpServletRequest);
+            if (awsCognitoConfiguration == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            if (awsCustomLoginService != null && !awsCustomLoginService.login(subject, httpServletRequest, siteKey, awsCognitoConfiguration)) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
@@ -80,6 +112,10 @@ public class AwsCognitoEndpoint {
     }
 
     private static String decryptUser(String userEncrypted, String secretKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, DigestException {
+        if (StringUtils.isBlank(secretKey)) {
+            return null;
+        }
+
         byte[] cipherData = Base64.getDecoder().decode(userEncrypted);
         byte[] saltData = Arrays.copyOfRange(cipherData, 8, 16);
 

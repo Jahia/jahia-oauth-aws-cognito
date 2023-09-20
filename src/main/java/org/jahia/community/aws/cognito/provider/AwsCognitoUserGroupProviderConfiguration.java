@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.api.settings.SettingsBean;
+import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.jahia.exceptions.JahiaRuntimeException;
 import org.jahia.modules.external.users.UserGroupProviderConfiguration;
 import org.jahia.osgi.BundleUtils;
@@ -93,9 +94,6 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
         }
         if (parameters.containsKey("propValue." + AwsCognitoConfiguration.SECRET_ACCESS_KEY)) {
             properties.put(AwsCognitoConfiguration.SECRET_ACCESS_KEY, parameters.get("propValue." + AwsCognitoConfiguration.SECRET_ACCESS_KEY));
-        }
-        if (parameters.containsKey("propValue." + AwsCognitoConfiguration.REGION)) {
-            properties.put(AwsCognitoConfiguration.REGION, parameters.get("propValue." + AwsCognitoConfiguration.REGION));
         }
         if (parameters.containsKey("propValue." + AwsCognitoConfiguration.USER_POOL_ID)) {
             properties.put(AwsCognitoConfiguration.USER_POOL_ID, parameters.get("propValue." + AwsCognitoConfiguration.USER_POOL_ID));

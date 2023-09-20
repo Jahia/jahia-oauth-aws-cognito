@@ -18,9 +18,8 @@ This module is a community module to show how to implement an authentication bas
 - Download and deploy the module [jahia-oauth-aws-cognito](https://store.jahia.com/contents/modules-repository/org/jahia/community/jahia-oauth-aws-cognito.html)
 - Activate the module in a site (systemsite for instance)
 - Go to Server settings: set up  user and group hot provisioning
-  - `accessKeyId`: AWS access key
+  - `accessKeyId`: AWS access key ID
   - `secretAccessKey`: AWS secret access key
-  - `region`: AWS region
   - `userPoolId`: AWS user pool ID
 - Go to Site settings: set up the fields and toggle the slide `Activate` otherwise the login url provider will not work (only Jahia Actions still work)
   - OpenID Connect implementation:
@@ -31,3 +30,6 @@ This module is a community module to show how to implement an authentication bas
   - External login URL: toggle the slider `With custom login`
     - `secretKey`: Custom secretKey to identifity the user
     - `loginUrl`: Custom login URL
+    - `accessKeyId`: Admin access key ID
+    - `secretAccessKey`: Admin secret access key
+    - `userPoolId`: Admin user pool ID

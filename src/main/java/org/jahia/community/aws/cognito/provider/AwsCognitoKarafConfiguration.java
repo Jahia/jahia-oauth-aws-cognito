@@ -1,6 +1,7 @@
 package org.jahia.community.aws.cognito.provider;
 
 import org.apache.commons.lang.StringUtils;
+import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
 import org.jahia.modules.external.users.ExternalUserGroupService;
 import org.osgi.framework.BundleContext;
@@ -60,7 +61,6 @@ public class AwsCognitoKarafConfiguration {
                 (String) dictionary.get(AwsCognitoConfiguration.TARGET_SITE),
                 (String) dictionary.get(AwsCognitoConfiguration.ACCESS_KEY_ID),
                 (String) dictionary.get(AwsCognitoConfiguration.SECRET_ACCESS_KEY),
-                (String) dictionary.get(AwsCognitoConfiguration.REGION),
                 (String) dictionary.get(AwsCognitoConfiguration.USER_POOL_ID)));
         // Activate (again)
         awsCognitoUserGroupProvider.register();

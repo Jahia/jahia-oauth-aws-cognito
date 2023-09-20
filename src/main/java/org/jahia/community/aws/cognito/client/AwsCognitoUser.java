@@ -6,7 +6,9 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.UserStatusT
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserType;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class AwsCognitoUser implements Serializable {
@@ -16,13 +18,14 @@ public class AwsCognitoUser implements Serializable {
     private String givenName;
     private String familyName;
     private String email;
-    private final boolean enabled;
-    private final boolean confirmed;
+    private final UserStatusType userStatusType;
     private JahiaUserImpl jahiaUser;
     private List<String> groups;
+    private final Map<String, String> attributes;
 
     public AwsCognitoUser(UserType awsUser) {
         username = awsUser.username();
+        attributes = new HashMap<>();
         awsUser.attributes().forEach(attributeType -> {
             if ("given_name".equals(attributeType.name())) {
                 givenName = attributeType.value();
@@ -30,10 +33,12 @@ public class AwsCognitoUser implements Serializable {
                 familyName = attributeType.value();
             } else if ("email".equals(attributeType.name())) {
                 email = attributeType.value();
+            } else {
+                attributes.put(attributeType.name(), attributeType.value());
             }
         });
-        enabled = awsUser.enabled();
-        confirmed = awsUser.userStatus() == UserStatusType.CONFIRMED;
+        attributes.put(AwsCognitoConstants.USER_PROPERTY_STATUS, awsUser.userStatusAsString());
+        userStatusType = awsUser.userStatus();
     }
 
     public String getUsername() {
@@ -49,9 +54,8 @@ public class AwsCognitoUser implements Serializable {
         properties.put(AwsCognitoConstants.USER_PROPERTY_FIRSTNAME, givenName);
         properties.put(AwsCognitoConstants.USER_PROPERTY_LASTNAME, familyName);
         properties.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, email);
-        properties.put(AwsCognitoConstants.USER_PROPERTY_ACCOUNTLOCKED, String.valueOf(!enabled || !confirmed));
-        properties.put(AwsCognitoConstants.USER_PROPERTY_ENABLED, String.valueOf(enabled));
-        properties.put(AwsCognitoConstants.USER_PROPERTY_CONFIRMED, String.valueOf(confirmed));
+        properties.put(AwsCognitoConstants.USER_PROPERTY_ACCOUNTLOCKED, String.valueOf(userStatusType != UserStatusType.CONFIRMED));
+        properties.putAll(attributes);
         jahiaUser = new JahiaUserImpl(username, username, properties, false, providerKey, siteKey);
         return username;
     }
