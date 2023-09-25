@@ -51,7 +51,7 @@ public class AwsCognitoUser implements Serializable {
         properties.put(AwsCognitoConstants.USER_PROPERTY_FIRSTNAME, givenName);
         properties.put(AwsCognitoConstants.USER_PROPERTY_LASTNAME, familyName);
         properties.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, email);
-        properties.put(AwsCognitoConstants.USER_PROPERTY_ACCOUNTLOCKED, attributes.containsKey(AwsCognitoConstants.USER_ATTRIBUTE_ACCOUNTLOCKED) && "true".equals(attributes.get(AwsCognitoConstants.USER_ATTRIBUTE_ACCOUNTLOCKED)));
+        properties.put(AwsCognitoConstants.USER_PROPERTY_ACCOUNTLOCKED, String.valueOf(attributes.containsKey(AwsCognitoConstants.USER_ATTRIBUTE_ACCOUNTLOCKED) && "true".equals(attributes.get(AwsCognitoConstants.USER_ATTRIBUTE_ACCOUNTLOCKED))));
         properties.putAll(attributes);
         jahiaUser = new JahiaUserImpl(username, username, properties, false, providerKey, siteKey);
         return username;
