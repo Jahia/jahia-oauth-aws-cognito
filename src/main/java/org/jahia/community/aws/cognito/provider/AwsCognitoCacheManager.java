@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 
 @Component(service = AwsCognitoCacheManager.class)
 public class AwsCognitoCacheManager {
+    private static final String MODULE_NAME = "jahia-oauth-aws-cognito";
     private static final String USER_CACHE = "AwsCognitoUsersCache";
     private static final String GROUP_CACHE = "AwsCognitoGroupsCache";
     private static final int TIME_TO_IDLE = 3600;
@@ -91,7 +92,7 @@ public class AwsCognitoCacheManager {
         if (logger.isDebugEnabled()) {
             logger.debug("Caching user {} in site {}", awsCognitoUser.getUsername(), siteKey);
         }
-        ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(awsCognitoUser, AwsCognitoUserGroupProviderConfiguration.KEY);
+        ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(awsCognitoUser, MODULE_NAME);
         userCache.put(new Element(getCacheNameKey(providerKey, siteKey, awsCognitoUser.cacheJahiaUser(providerKey, siteKey)), cacheEntry));
     }
 
@@ -111,7 +112,7 @@ public class AwsCognitoCacheManager {
         if (logger.isDebugEnabled()) {
             logger.debug("Caching group ({}): {} in site {}", awsCognitoGroup.getName(), awsCognitoGroup.getName(), siteKey);
         }
-        ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(awsCognitoGroup, AwsCognitoUserGroupProviderConfiguration.KEY);
+        ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(awsCognitoGroup, MODULE_NAME);
         groupCache.put(new Element(getCacheNameKey(providerKey, siteKey, awsCognitoGroup.cacheGroup(siteKey)), cacheEntry));
     }
 
