@@ -4,6 +4,7 @@ import org.jahia.api.Constants;
 import org.jahia.api.content.JCRTemplate;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
 import org.jahia.modules.jahiaauth.service.SettingsService;
+import org.jahia.modules.jahiaoauth.service.JahiaOAuthConstants;
 import org.jahia.osgi.BundleUtils;
 import org.jahia.services.sites.JahiaSite;
 import org.jahia.services.sites.JahiaSitesService;
@@ -78,7 +79,9 @@ public final class AwsCognitoConstants {
                 null,
                 connectorConfig.getProperty(AwsCognitoConstants.ACCESS_KEY_ID),
                 connectorConfig.getProperty(AwsCognitoConstants.SECRET_ACCESS_KEY),
-                connectorConfig.getProperty(AwsCognitoConstants.USER_POOL_ID)
+                connectorConfig.getProperty(AwsCognitoConstants.USER_POOL_ID),
+                connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT),
+                connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_KEY)
         );
     }
 
