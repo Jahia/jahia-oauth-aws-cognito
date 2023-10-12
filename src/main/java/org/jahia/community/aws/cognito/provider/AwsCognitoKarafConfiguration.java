@@ -63,7 +63,7 @@ public class AwsCognitoKarafConfiguration {
                 (String) dictionary.get(AwsCognitoConstants.ACCESS_KEY_ID),
                 (String) dictionary.get(AwsCognitoConstants.SECRET_ACCESS_KEY),
                 (String) dictionary.get(AwsCognitoConstants.USER_POOL_ID),
-                null, null));
+                null, null, null));
         // Activate (again)
         awsCognitoUserGroupProvider.register();
     }

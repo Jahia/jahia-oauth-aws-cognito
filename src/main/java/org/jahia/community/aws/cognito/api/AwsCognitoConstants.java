@@ -2,6 +2,7 @@ package org.jahia.community.aws.cognito.api;
 
 import org.jahia.api.Constants;
 import org.jahia.api.content.JCRTemplate;
+import org.jahia.community.aws.cognito.provider.AwsCognitoCacheManager;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
 import org.jahia.modules.jahiaauth.service.SettingsService;
 import org.jahia.modules.jahiaoauth.service.JahiaOAuthConstants;
@@ -41,6 +42,7 @@ public final class AwsCognitoConstants {
     public static final String USER_PROPERTY_ACCOUNTLOCKED = "j:accountLocked";
     public static final String USER_PROPERTY_STATUS = "status";
     public static final String USER_ATTRIBUTE_ACCOUNTLOCKED = "locked";
+    public static final String USER_PROPERTY_LAST_CONNECTION_DATE = "j:lastConnectionDate";
 
     public static String getSiteKey(HttpServletRequest httpServletRequest, JCRTemplate jcrTemplate, JahiaSitesService jahiaSitesService) {
         try {
@@ -81,7 +83,8 @@ public final class AwsCognitoConstants {
                 connectorConfig.getProperty(AwsCognitoConstants.SECRET_ACCESS_KEY),
                 connectorConfig.getProperty(AwsCognitoConstants.USER_POOL_ID),
                 connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT),
-                connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_KEY)
+                connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_KEY),
+                connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_SECRET)
         );
     }
 
@@ -93,5 +96,9 @@ public final class AwsCognitoConstants {
             connectorConfig = settingsService.getConnectorConfig(JahiaSitesService.SYSTEM_SITE_KEY, AwsCognitoConstants.KEY);
         }
         return connectorConfig;
+    }
+
+    public static void flushCaches() {
+        BundleUtils.getOsgiService(AwsCognitoCacheManager.class, null).flushCaches();
     }
 }

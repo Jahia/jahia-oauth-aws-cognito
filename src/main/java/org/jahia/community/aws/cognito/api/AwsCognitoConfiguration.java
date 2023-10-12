@@ -10,8 +10,9 @@ public class AwsCognitoConfiguration {
     private final String userPoolId;
     private final String endpoint;
     private final String clientId;
+    private final String clientSecret;
 
-    public AwsCognitoConfiguration(String targetSite, String accessKeyId, String secretAccessKey, String userPoolId, String endpoint, String clientId) {
+    public AwsCognitoConfiguration(String targetSite, String accessKeyId, String secretAccessKey, String userPoolId, String endpoint, String clientId, String clientSecret) {
         this.targetSite = targetSite;
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
@@ -19,6 +20,7 @@ public class AwsCognitoConfiguration {
         this.userPoolId = userPoolId;
         this.endpoint = endpoint;
         this.clientId = clientId;
+        this.clientSecret = clientSecret;
     }
 
     public String getTargetSite() {
@@ -47,5 +49,9 @@ public class AwsCognitoConfiguration {
 
     public String getClientId() {
         return clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
     }
 }
