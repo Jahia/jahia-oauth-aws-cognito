@@ -1,6 +1,7 @@
 package org.jahia.community.aws.cognito.client;
 
 import com.auth0.jwt.JWT;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.util.CollectionUtils;
 import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.osgi.service.component.annotations.Component;
@@ -100,8 +101,41 @@ public class AwsCognitoClientService {
     }
 
     public Optional<List<AwsCognitoUser>> searchUsers(AwsCognitoConfiguration awsCognitoConfiguration, String search, long offset, long limit) {
-        logger.warn("Method searchUsers not implemented");
-        return getUsers(awsCognitoConfiguration, offset, limit);
+        return getUsers(awsCognitoConfiguration, offset, limit)
+                .map(awsCognitoUsers -> awsCognitoUsers.stream()
+                        .filter(user -> StringUtils.contains(user.getUsername(), search) ||
+                                StringUtils.contains(user.getFirstnam(), search) ||
+                                StringUtils.contains(user.getLastname(), search) ||
+                                StringUtils.contains(user.getEmail(), search))
+                        .collect(Collectors.toList()));
+    }
+
+    public Optional<List<AwsCognitoUser>> searchUsersByFirstname(AwsCognitoConfiguration awsCognitoConfiguration, String firstname, long offset, long limit) {
+        return getUsers(awsCognitoConfiguration, offset, limit)
+                .map(awsCognitoUsers -> awsCognitoUsers.stream()
+                        .filter(user -> StringUtils.contains(user.getFirstnam(), firstname))
+                        .collect(Collectors.toList()));
+    }
+
+    public Optional<List<AwsCognitoUser>> searchUsersByLastname(AwsCognitoConfiguration awsCognitoConfiguration, String lastname, long offset, long limit) {
+        return getUsers(awsCognitoConfiguration, offset, limit)
+                .map(awsCognitoUsers -> awsCognitoUsers.stream()
+                        .filter(user -> StringUtils.contains(user.getLastname(), lastname))
+                        .collect(Collectors.toList()));
+    }
+
+    public Optional<List<AwsCognitoUser>> searchUsersByEmail(AwsCognitoConfiguration awsCognitoConfiguration, String email, long offset, long limit) {
+        return getUsers(awsCognitoConfiguration, offset, limit)
+                .map(awsCognitoUsers -> awsCognitoUsers.stream()
+                        .filter(user -> StringUtils.contains(user.getEmail(), email))
+                        .collect(Collectors.toList()));
+    }
+
+    public Optional<List<AwsCognitoGroup>> searchGroups(AwsCognitoConfiguration awsCognitoConfiguration, String search, long offset, long limit) {
+        return getGroups(awsCognitoConfiguration, offset, limit)
+                .map(awsCognitoGroups -> awsCognitoGroups.stream()
+                        .filter(group -> StringUtils.contains(group.getName(), search))
+                        .collect(Collectors.toList()));
     }
 
     public Optional<AwsCognitoGroup> getGroup(AwsCognitoConfiguration awsCognitoConfiguration, String groupName) {

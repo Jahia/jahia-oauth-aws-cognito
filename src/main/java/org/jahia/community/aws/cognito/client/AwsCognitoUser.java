@@ -42,6 +42,18 @@ public class AwsCognitoUser implements Serializable {
         return username;
     }
 
+    public String getFirstnam() {
+        return givenName;
+    }
+
+    public String getLastname() {
+        return familyName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
     public JahiaUserImpl getJahiaUser() {
         return jahiaUser;
     }

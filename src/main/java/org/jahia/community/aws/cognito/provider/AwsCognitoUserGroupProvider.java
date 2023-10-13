@@ -2,6 +2,7 @@ package org.jahia.community.aws.cognito.provider;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
+import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
 import org.jahia.community.aws.cognito.client.AwsCognitoGroup;
 import org.jahia.community.aws.cognito.client.AwsCognitoUser;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -143,8 +145,24 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         Optional<List<AwsCognitoUser>> awsCognitoUsers;
         if (searchCriteria.containsKey("*")) {
             awsCognitoUsers = awsCognitoClientService.searchUsers(awsCognitoConfiguration, searchCriteria.getProperty("*").replace("*", ""), offset, limit);
-        } else {
+        } else if (searchCriteria.isEmpty()) {
             awsCognitoUsers = awsCognitoClientService.getUsers(awsCognitoConfiguration, offset, limit);
+        } else {
+            Map.Entry<Object, Object> e = searchCriteria.entrySet().stream().findFirst().get();
+            String key = (String) e.getKey(), value = (String) e.getValue();
+            switch (key) {
+                case AwsCognitoConstants.USER_PROPERTY_FIRSTNAME:
+                    awsCognitoUsers = awsCognitoClientService.searchUsersByFirstname(awsCognitoConfiguration, value, offset, limit);
+                    break;
+                case AwsCognitoConstants.USER_PROPERTY_LASTNAME:
+                    awsCognitoUsers = awsCognitoClientService.searchUsersByLastname(awsCognitoConfiguration, value, offset, limit);
+                    break;
+                case AwsCognitoConstants.USER_PROPERTY_EMAIL:
+                    awsCognitoUsers = awsCognitoClientService.searchUsersByEmail(awsCognitoConfiguration, value, offset, limit);
+                    break;
+                default:
+                    awsCognitoUsers = awsCognitoClientService.searchUsers(awsCognitoConfiguration, value, offset, limit);
+            }
         }
         List<String> userIds = new ArrayList<>();
         awsCognitoUsers.orElse(Collections.emptyList())
@@ -173,8 +191,16 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
                     .orElse(Collections.emptyList());
         }
 
+        Optional<List<AwsCognitoGroup>> awsCognitoGroups;
+        if (searchCriteria.containsKey("*")) {
+            awsCognitoGroups = awsCognitoClientService.searchGroups(awsCognitoConfiguration, searchCriteria.getProperty("*").replace("*", ""), offset, limit);
+        } else if (searchCriteria.isEmpty()) {
+            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, offset, limit);
+        } else {
+            awsCognitoGroups = awsCognitoClientService.searchGroups(awsCognitoConfiguration, (String) searchCriteria.entrySet().stream().findFirst().get().getValue(), offset, limit);
+        }
         List<String> groupIds = new ArrayList<>();
-        awsCognitoClientService.getGroups(awsCognitoConfiguration, offset, limit).orElse(Collections.emptyList())
+        awsCognitoGroups.orElse(Collections.emptyList())
                 .forEach(group -> {
                     groupIds.add(group.getName());
                     awsCognitoCacheManager.cacheGroup(getKey(), getSiteKey(), group);
