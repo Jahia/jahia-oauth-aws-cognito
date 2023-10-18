@@ -67,11 +67,21 @@ public final class AwsCognitoConstants {
         return null;
     }
 
+    public static AwsCognitoConfiguration getAwsCognitoConfiguration() {
+        return getAwsCognitoConfiguration(null);
+    }
+
     public static AwsCognitoConfiguration getAwsCognitoConfiguration(HttpServletRequest httpServletRequest) {
-        String siteKey = AwsCognitoConstants.getSiteKey(httpServletRequest, BundleUtils.getOsgiService(JCRTemplate.class, null), BundleUtils.getOsgiService(JahiaSitesService.class, null));
-        if (siteKey == null) {
-            logger.warn("Site not found.");
-            return null;
+        String siteKey;
+        if (httpServletRequest == null) {
+            logger.debug("No HTTP request, fallback to systemsite");
+            siteKey = JahiaSitesService.SYSTEM_SITE_KEY;
+        } else {
+            siteKey = AwsCognitoConstants.getSiteKey(httpServletRequest, BundleUtils.getOsgiService(JCRTemplate.class, null), BundleUtils.getOsgiService(JahiaSitesService.class, null));
+            if (siteKey == null) {
+                logger.warn("Site not found.");
+                return null;
+            }
         }
         ConnectorConfig connectorConfig = getConnectorConfig(siteKey);
         if (connectorConfig == null) {
