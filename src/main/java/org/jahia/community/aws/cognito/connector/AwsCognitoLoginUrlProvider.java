@@ -84,10 +84,10 @@ public class AwsCognitoLoginUrlProvider implements LoginUrlProvider {
         if (siteKey == null) {
             return null;
         }
-        ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConstants.KEY);
+        ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConstants.CONNECTOR_KEY);
         if (connectorConfig == null) {
             // fallback to systemsite
-            connectorConfig = settingsService.getConnectorConfig(JahiaSitesService.SYSTEM_SITE_KEY, AwsCognitoConstants.KEY);
+            connectorConfig = settingsService.getConnectorConfig(JahiaSitesService.SYSTEM_SITE_KEY, AwsCognitoConstants.CONNECTOR_KEY);
             if (connectorConfig == null) {
                 // no configuration found
                 return null;

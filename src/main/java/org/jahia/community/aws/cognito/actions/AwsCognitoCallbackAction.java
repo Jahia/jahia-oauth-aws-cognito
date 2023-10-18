@@ -71,7 +71,7 @@ public class AwsCognitoCallbackAction extends Action {
 
             try {
                 String siteKey = renderContext.getSite().getSiteKey();
-                ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConstants.KEY);
+                ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConstants.CONNECTOR_KEY);
                 jahiaOAuthService.extractAccessTokenAndExecuteMappers(connectorConfig, token, httpServletRequest.getRequestedSessionId());
                 String returnUrl = (String) httpServletRequest.getSession(false).getAttribute(AwsCognitoConstants.SESSION_OAUTH_AWS_COGNITO_RETURN_URL);
                 if (StringUtils.isBlank(returnUrl)) {

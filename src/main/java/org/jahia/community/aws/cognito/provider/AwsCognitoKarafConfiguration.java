@@ -39,7 +39,7 @@ public class AwsCognitoKarafConfiguration {
         } else {
             confId = StringUtils.removeEnd(StringUtils.substringAfter(filename, factoryPid + "-"), ".cfg");
         }
-        return (StringUtils.isBlank(confId) || "config".equals(confId)) ? AwsCognitoUserGroupProviderConfiguration.KEY : (AwsCognitoUserGroupProviderConfiguration.KEY + "." + confId);
+        return (StringUtils.isBlank(confId) || "config".equals(confId)) ? AwsCognitoConstants.PROVIDER_KEY : (AwsCognitoConstants.PROVIDER_KEY + "." + confId);
     }
 
     public String getProviderKey() {

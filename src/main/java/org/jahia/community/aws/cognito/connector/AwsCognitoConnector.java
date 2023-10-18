@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.List;
 
-@Component(service = {AwsCognitoConnector.class, OAuthConnectorService.class, ConnectorService.class}, property = {JahiaAuthConstants.CONNECTOR_SERVICE_NAME + "=" + AwsCognitoConstants.KEY}, immediate = true)
+@Component(service = {AwsCognitoConnector.class, OAuthConnectorService.class, ConnectorService.class}, property = {JahiaAuthConstants.CONNECTOR_SERVICE_NAME + "=" + AwsCognitoConstants.CONNECTOR_KEY}, immediate = true)
 public class AwsCognitoConnector implements OAuthConnectorService {
     private static final Logger logger = LoggerFactory.getLogger(AwsCognitoConnector.class);
 
@@ -31,13 +31,13 @@ public class AwsCognitoConnector implements OAuthConnectorService {
     @Activate
     private void onActivate() {
         logger.info("Register AwsCognitoConnector");
-        jahiaOAuthService.addOAuthDefaultApi20(AwsCognitoConstants.KEY, connectorConfig -> AwsCognitoApi20.instance(connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT), connectorConfig.getProperty(AwsCognitoConstants.REGION)));
+        jahiaOAuthService.addOAuthDefaultApi20(AwsCognitoConstants.CONNECTOR_KEY, connectorConfig -> AwsCognitoApi20.instance(connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT), connectorConfig.getProperty(AwsCognitoConstants.REGION)));
     }
 
     @Deactivate
     private void onDeactivate() {
         logger.info("Unregister AwsCognitoConnector");
-        jahiaOAuthService.removeOAuthDefaultApi20(AwsCognitoConstants.KEY);
+        jahiaOAuthService.removeOAuthDefaultApi20(AwsCognitoConstants.CONNECTOR_KEY);
     }
 
     @Override

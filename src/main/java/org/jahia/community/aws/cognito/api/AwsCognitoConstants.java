@@ -22,7 +22,8 @@ public final class AwsCognitoConstants {
         // No constructor
     }
 
-    public static final String KEY = "AwsCognitoApi20";
+    public static final String PROVIDER_KEY = "awsCognito";
+    public static final String CONNECTOR_KEY = "AwsCognitoApi20";
     public static final String URL = "https://%s.auth.%s.amazoncognito.com";
     public static final String SESSION_OAUTH_AWS_COGNITO_RETURN_URL = "oauth.aws-cognito.return-url";
 
@@ -90,10 +91,10 @@ public final class AwsCognitoConstants {
 
     public static ConnectorConfig getConnectorConfig(String siteKey) {
         SettingsService settingsService = BundleUtils.getOsgiService(SettingsService.class, null);
-        ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConstants.KEY);
+        ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConstants.CONNECTOR_KEY);
         if (connectorConfig == null) {
             // fallback to systemsite
-            connectorConfig = settingsService.getConnectorConfig(JahiaSitesService.SYSTEM_SITE_KEY, AwsCognitoConstants.KEY);
+            connectorConfig = settingsService.getConnectorConfig(JahiaSitesService.SYSTEM_SITE_KEY, AwsCognitoConstants.CONNECTOR_KEY);
         }
         return connectorConfig;
     }

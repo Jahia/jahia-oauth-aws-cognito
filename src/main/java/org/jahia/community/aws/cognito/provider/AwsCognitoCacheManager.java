@@ -117,7 +117,7 @@ public class AwsCognitoCacheManager {
     }
 
     private static String getCacheNameKey(String providerKey, String siteKey, String objectName) {
-        return providerKey + "_" + siteKey + "_" + AwsCognitoUserGroupProviderConfiguration.KEY + "_" + objectName;
+        return providerKey + "_" + siteKey + "_" + AwsCognitoConstants.PROVIDER_KEY + "_" + objectName;
     }
 
     public void flushCaches() {

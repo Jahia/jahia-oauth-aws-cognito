@@ -60,7 +60,7 @@ public class AwsCognitoLoginAction extends Action {
 
     @Override
     public ActionResult doExecute(HttpServletRequest httpServletRequest, RenderContext renderContext, Resource resource, JCRSessionWrapper jcrSessionWrapper, Map<String, List<String>> parameters, URLResolver urlResolver) {
-        ConnectorConfig connectorConfig = settingsService.getConnectorConfig(JahiaSitesService.SYSTEM_SITE_KEY, AwsCognitoConstants.KEY);
+        ConnectorConfig connectorConfig = settingsService.getConnectorConfig(JahiaSitesService.SYSTEM_SITE_KEY, AwsCognitoConstants.CONNECTOR_KEY);
         if (connectorConfig == null) {
             logger.warn("The systemsite doesn't have the AWS Cognito configuration");
             return ActionResult.BAD_REQUEST;
