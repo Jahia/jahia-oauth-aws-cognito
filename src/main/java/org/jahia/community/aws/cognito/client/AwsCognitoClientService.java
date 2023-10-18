@@ -103,7 +103,8 @@ public class AwsCognitoClientService {
     public Optional<List<AwsCognitoUser>> searchUsers(AwsCognitoConfiguration awsCognitoConfiguration, String search, long offset, long limit) {
         return getUsers(awsCognitoConfiguration, offset, limit)
                 .map(awsCognitoUsers -> awsCognitoUsers.stream()
-                        .filter(user -> StringUtils.contains(user.getUsername(), search) ||
+                        .filter(user -> StringUtils.contains(user.getSub(), search) ||
+                                StringUtils.contains(user.getUsername(), search) ||
                                 StringUtils.contains(user.getFirstnam(), search) ||
                                 StringUtils.contains(user.getLastname(), search) ||
                                 StringUtils.contains(user.getEmail(), search))

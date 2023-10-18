@@ -95,7 +95,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
 
         List<Member> members = new ArrayList<>();
         awsCognitoClientService.getGroupMembers(awsCognitoConfiguration, groupId).orElse(Collections.emptyList())
-                .forEach(user -> members.add(new Member(user.getUsername(), Member.MemberType.USER)));
+                .forEach(user -> members.add(new Member(user.getSub(), Member.MemberType.USER)));
         awsCognitoCacheManager.getOrRefreshGroup(getKey(), getSiteKey(), groupId, () -> awsCognitoClientService.getGroup(awsCognitoConfiguration, groupId))
                 .ifPresent(g -> g.setMembers(members.stream().map(Member::getName).collect(Collectors.toList())));
         return Collections.unmodifiableList(members);
@@ -138,7 +138,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         if (searchCriteria.containsKey(PROP_USERNAME) && searchCriteria.size() == 1) {
             String userId = searchCriteria.getProperty(PROP_USERNAME);
             return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, userId))
-                    .map(awsCognitoUser -> Collections.singletonList(awsCognitoUser.getUsername()))
+                    .map(awsCognitoUser -> Collections.singletonList(awsCognitoUser.getSub()))
                     .orElse(Collections.emptyList());
         }
 
@@ -167,7 +167,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         List<String> userIds = new ArrayList<>();
         awsCognitoUsers.orElse(Collections.emptyList())
                 .forEach(user -> {
-                    userIds.add(user.getUsername());
+                    userIds.add(user.getSub());
                     awsCognitoCacheManager.cacheUser(getKey(), getSiteKey(), user);
                 });
         return Collections.unmodifiableList(userIds);

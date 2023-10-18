@@ -5,15 +5,16 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
+import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.community.aws.cognito.client.AwsCognitoGroup;
 import org.jahia.community.aws.cognito.client.AwsCognitoUser;
-import org.jahia.services.SpringContextSingleton;
 import org.jahia.services.cache.CacheHelper;
+import org.jahia.services.cache.CacheProvider;
 import org.jahia.services.cache.ModuleClassLoaderAwareCacheEntry;
-import org.jahia.services.cache.ehcache.EhCacheProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,12 +30,17 @@ public class AwsCognitoCacheManager {
 
     private static final Logger logger = LoggerFactory.getLogger(AwsCognitoCacheManager.class);
 
+    private CacheProvider cacheProvider;
     private Ehcache groupCache;
     private Ehcache userCache;
 
+    @Reference
+    private void setCacheProvider(CacheProvider cacheProvider) {
+        this.cacheProvider = cacheProvider;
+    }
+
     @Activate
     private void onActivate() {
-        EhCacheProvider cacheProvider = (EhCacheProvider) SpringContextSingleton.getInstance().getContext().getBean("ehCacheProvider");
         final CacheManager cacheManager = cacheProvider.getCacheManager();
         userCache = cacheManager.getCache(USER_CACHE);
         if (userCache == null) {
@@ -90,7 +96,7 @@ public class AwsCognitoCacheManager {
 
     public void cacheUser(String providerKey, String siteKey, AwsCognitoUser awsCognitoUser) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Caching user {} in site {}", awsCognitoUser.getUsername(), siteKey);
+            logger.debug("Caching user {} in site {}", awsCognitoUser.getSub(), siteKey);
         }
         ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(awsCognitoUser, MODULE_NAME);
         userCache.put(new Element(getCacheNameKey(providerKey, siteKey, awsCognitoUser.cacheJahiaUser(providerKey, siteKey)), cacheEntry));
