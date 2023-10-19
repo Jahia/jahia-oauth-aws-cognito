@@ -49,7 +49,7 @@ public class AwsCognitoUser implements Serializable {
         return sub;
     }
 
-    public String getFirstnam() {
+    public String getFirstname() {
         return givenName;
     }
 

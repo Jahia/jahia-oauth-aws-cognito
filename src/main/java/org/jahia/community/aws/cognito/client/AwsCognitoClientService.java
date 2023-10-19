@@ -63,6 +63,9 @@ public class AwsCognitoClientService {
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListUsersResponse response = cognitoIdentityProviderClient.listUsers(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug(response.toString());
+            }
             if (!response.hasUsers() || CollectionUtils.isEmpty(response.users())) {
                 return Optional.empty();
             }
@@ -85,6 +88,9 @@ public class AwsCognitoClientService {
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListUsersResponse response = cognitoIdentityProviderClient.listUsers(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug(response.toString());
+            }
             if (!response.hasUsers() || CollectionUtils.isEmpty(response.users())) {
                 return Optional.empty();
             }
@@ -105,37 +111,37 @@ public class AwsCognitoClientService {
                 .map(awsCognitoUsers -> awsCognitoUsers.stream()
                         .filter(user -> StringUtils.contains(user.getSub(), search) ||
                                 StringUtils.contains(user.getUsername(), search) ||
-                                StringUtils.contains(user.getFirstnam(), search) ||
-                                StringUtils.contains(user.getLastname(), search) ||
-                                StringUtils.contains(user.getEmail(), search))
+                                StringUtils.containsIgnoreCase(user.getFirstname(), search) ||
+                                StringUtils.containsIgnoreCase(user.getLastname(), search) ||
+                                StringUtils.containsIgnoreCase(user.getEmail(), search))
                         .collect(Collectors.toList()));
     }
 
     public Optional<List<AwsCognitoUser>> searchUsersByFirstname(AwsCognitoConfiguration awsCognitoConfiguration, String firstname, long offset, long limit) {
         return getUsers(awsCognitoConfiguration, offset, limit)
                 .map(awsCognitoUsers -> awsCognitoUsers.stream()
-                        .filter(user -> StringUtils.contains(user.getFirstnam(), firstname))
+                        .filter(user -> StringUtils.containsIgnoreCase(user.getFirstname(), firstname))
                         .collect(Collectors.toList()));
     }
 
     public Optional<List<AwsCognitoUser>> searchUsersByLastname(AwsCognitoConfiguration awsCognitoConfiguration, String lastname, long offset, long limit) {
         return getUsers(awsCognitoConfiguration, offset, limit)
                 .map(awsCognitoUsers -> awsCognitoUsers.stream()
-                        .filter(user -> StringUtils.contains(user.getLastname(), lastname))
+                        .filter(user -> StringUtils.containsIgnoreCase(user.getLastname(), lastname))
                         .collect(Collectors.toList()));
     }
 
     public Optional<List<AwsCognitoUser>> searchUsersByEmail(AwsCognitoConfiguration awsCognitoConfiguration, String email, long offset, long limit) {
         return getUsers(awsCognitoConfiguration, offset, limit)
                 .map(awsCognitoUsers -> awsCognitoUsers.stream()
-                        .filter(user -> StringUtils.contains(user.getEmail(), email))
+                        .filter(user -> StringUtils.containsIgnoreCase(user.getEmail(), email))
                         .collect(Collectors.toList()));
     }
 
     public Optional<List<AwsCognitoGroup>> searchGroups(AwsCognitoConfiguration awsCognitoConfiguration, String search, long offset, long limit) {
         return getGroups(awsCognitoConfiguration, offset, limit)
                 .map(awsCognitoGroups -> awsCognitoGroups.stream()
-                        .filter(group -> StringUtils.contains(group.getName(), search))
+                        .filter(group -> StringUtils.containsIgnoreCase(group.getName(), search))
                         .collect(Collectors.toList()));
     }
 
@@ -147,6 +153,9 @@ public class AwsCognitoClientService {
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             GetGroupResponse response = cognitoIdentityProviderClient.getGroup(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug(response.toString());
+            }
             if (response.group() == null) {
                 return Optional.empty();
             }
@@ -169,6 +178,9 @@ public class AwsCognitoClientService {
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListGroupsResponse response = cognitoIdentityProviderClient.listGroups(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug(response.toString());
+            }
             if (!response.hasGroups() || CollectionUtils.isEmpty(response.groups())) {
                 return Optional.empty();
             }
@@ -192,6 +204,9 @@ public class AwsCognitoClientService {
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListUsersInGroupResponse response = cognitoIdentityProviderClient.listUsersInGroup(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug(response.toString());
+            }
             if (!response.hasUsers() || CollectionUtils.isEmpty(response.users())) {
                 return Optional.empty();
             }
@@ -215,6 +230,9 @@ public class AwsCognitoClientService {
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             AdminListGroupsForUserResponse response = cognitoIdentityProviderClient.adminListGroupsForUser(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug(response.toString());
+            }
             if (!response.hasGroups() || CollectionUtils.isEmpty(response.groups())) {
                 return Optional.empty();
             }
@@ -244,6 +262,9 @@ public class AwsCognitoClientService {
                     .clientId(clientId)
                     .build();
             InitiateAuthResponse response = cognitoIdentityProviderClient.initiateAuth(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug(response.toString());
+            }
             return Optional.ofNullable(response.authenticationResult()).map(result -> JWT.decode(result.idToken()).getSubject());
         } finally {
             lock.unlock();
