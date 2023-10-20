@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminListGr
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.GetGroupRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.GetGroupResponse;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.GroupType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthResponse;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.ListGroupsRequest;
@@ -24,10 +25,12 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.ListUsersIn
 import software.amazon.awssdk.services.cognitoidentityprovider.model.ListUsersInGroupResponse;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.ListUsersRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.ListUsersResponse;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.UserType;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -81,29 +84,80 @@ public class AwsCognitoClientService {
         }
     }
 
-    public Optional<List<AwsCognitoUser>> getUsers(AwsCognitoConfiguration awsCognitoConfiguration, long offset, long limit) {
+    private void getUsersRecursively(AwsCognitoConfiguration awsCognitoConfiguration, List<UserType> users, String paginationToken) {
         lock.lock();
-        ListUsersRequest request = ListUsersRequest.builder()
-                .userPoolId(awsCognitoConfiguration.getUserPoolId())
-                .build();
+        ListUsersRequest.Builder request = ListUsersRequest.builder().userPoolId(awsCognitoConfiguration.getUserPoolId());
+        if (paginationToken != null) {
+            request.paginationToken(paginationToken);
+        }
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
-            ListUsersResponse response = cognitoIdentityProviderClient.listUsers(request);
+            ListUsersResponse response = cognitoIdentityProviderClient.listUsers(request.build());
             if (logger.isDebugEnabled()) {
                 logger.debug(response.toString());
             }
-            if (!response.hasUsers() || CollectionUtils.isEmpty(response.users())) {
-                return Optional.empty();
+            if (response.hasUsers() && !CollectionUtils.isEmpty(response.users())) {
+                users.addAll(response.users());
+                paginationToken = response.paginationToken();
+                if (paginationToken != null) {
+                    getUsersRecursively(awsCognitoConfiguration, users, paginationToken);
+                }
             }
-            return Optional.of(response.users().stream().map(AwsCognitoUser::new).collect(Collectors.toList()));
         } catch (Exception e) {
             logger.warn("Unable to get users");
             if (logger.isDebugEnabled()) {
                 logger.debug("", e);
             }
-            return Optional.empty();
         } finally {
             lock.unlock();
         }
+    }
+
+    public Optional<List<AwsCognitoUser>> getUsers(AwsCognitoConfiguration awsCognitoConfiguration, long offset, long limit) {
+        List<UserType> users = new ArrayList<>();
+        getUsersRecursively(awsCognitoConfiguration, users, null);
+        if (users.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(users.stream().map(AwsCognitoUser::new).collect(Collectors.toList()));
+    }
+
+    private void getGroupMembersRecursively(AwsCognitoConfiguration awsCognitoConfiguration, String groupName, List<UserType> users, String nextToken) {
+        lock.lock();
+        ListUsersInGroupRequest.Builder request = ListUsersInGroupRequest.builder()
+                .userPoolId(awsCognitoConfiguration.getUserPoolId())
+                .groupName(groupName);
+        if (nextToken != null) {
+            request.nextToken(nextToken);
+        }
+        try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
+            ListUsersInGroupResponse response = cognitoIdentityProviderClient.listUsersInGroup(request.build());
+            if (logger.isDebugEnabled()) {
+                logger.debug(response.toString());
+            }
+            if (response.hasUsers() && !CollectionUtils.isEmpty(response.users())) {
+                users.addAll(response.users());
+                nextToken = response.nextToken();
+                if (nextToken != null) {
+                    getGroupMembersRecursively(awsCognitoConfiguration, groupName, users, nextToken);
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Unable to get group {} members", groupName);
+            if (logger.isDebugEnabled()) {
+                logger.debug("", e);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public Optional<List<AwsCognitoUser>> getGroupMembers(AwsCognitoConfiguration awsCognitoConfiguration, String groupName) {
+        List<UserType> users = new ArrayList<>();
+        getGroupMembersRecursively(awsCognitoConfiguration, groupName, users, null);
+        if (users.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(users.stream().map(AwsCognitoUser::new).collect(Collectors.toList()));
     }
 
     public Optional<List<AwsCognitoUser>> searchUsers(AwsCognitoConfiguration awsCognitoConfiguration, String search, long offset, long limit) {
@@ -171,81 +225,80 @@ public class AwsCognitoClientService {
         }
     }
 
-    public Optional<List<AwsCognitoGroup>> getGroups(AwsCognitoConfiguration awsCognitoConfiguration, long offset, long limit) {
+    private void getGroupsRecursively(AwsCognitoConfiguration awsCognitoConfiguration, List<GroupType> groups, String nextToken) {
         lock.lock();
-        ListGroupsRequest request = ListGroupsRequest.builder()
-                .userPoolId(awsCognitoConfiguration.getUserPoolId())
-                .build();
+        ListGroupsRequest.Builder requestBuilder = ListGroupsRequest.builder().userPoolId(awsCognitoConfiguration.getUserPoolId());
+        if (nextToken != null) {
+            requestBuilder.nextToken(nextToken);
+        }
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
-            ListGroupsResponse response = cognitoIdentityProviderClient.listGroups(request);
+            ListGroupsResponse response = cognitoIdentityProviderClient.listGroups(requestBuilder.build());
             if (logger.isDebugEnabled()) {
                 logger.debug(response.toString());
             }
-            if (!response.hasGroups() || CollectionUtils.isEmpty(response.groups())) {
-                return Optional.empty();
+            if (response.hasGroups() && !CollectionUtils.isEmpty(response.groups())) {
+                groups.addAll(response.groups());
+                nextToken = response.nextToken();
+                if (nextToken != null) {
+                    getGroupsRecursively(awsCognitoConfiguration, groups, nextToken);
+                }
             }
-            return Optional.of(response.groups().stream().map(AwsCognitoGroup::new).collect(Collectors.toList()));
         } catch (Exception e) {
             logger.warn("Unable to get groups");
             if (logger.isDebugEnabled()) {
                 logger.debug("", e);
             }
-            return Optional.empty();
         } finally {
             lock.unlock();
         }
     }
 
-    public Optional<List<AwsCognitoUser>> getGroupMembers(AwsCognitoConfiguration awsCognitoConfiguration, String groupName) {
+    public Optional<List<AwsCognitoGroup>> getGroups(AwsCognitoConfiguration awsCognitoConfiguration, long offset, long limit) {
+        List<GroupType> groups = new ArrayList<>();
+        getGroupsRecursively(awsCognitoConfiguration, groups, null);
+        if (groups.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(groups.stream().map(AwsCognitoGroup::new).collect(Collectors.toList()));
+    }
+
+    private void getMembershipRecursively(AwsCognitoConfiguration awsCognitoConfiguration, String username, List<GroupType> groups, String nextToken) {
         lock.lock();
-        ListUsersInGroupRequest request = ListUsersInGroupRequest.builder()
+        AdminListGroupsForUserRequest.Builder request = AdminListGroupsForUserRequest.builder()
                 .userPoolId(awsCognitoConfiguration.getUserPoolId())
-                .groupName(groupName)
-                .build();
+                .username(username);
+        if (nextToken != null) {
+            request.nextToken(nextToken);
+        }
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
-            ListUsersInGroupResponse response = cognitoIdentityProviderClient.listUsersInGroup(request);
+            AdminListGroupsForUserResponse response = cognitoIdentityProviderClient.adminListGroupsForUser(request.build());
             if (logger.isDebugEnabled()) {
                 logger.debug(response.toString());
             }
-            if (!response.hasUsers() || CollectionUtils.isEmpty(response.users())) {
-                return Optional.empty();
+            if (response.hasGroups() && !CollectionUtils.isEmpty(response.groups())) {
+                groups.addAll(response.groups());
+                nextToken = response.nextToken();
+                if (nextToken != null) {
+                    getMembershipRecursively(awsCognitoConfiguration, username, groups, nextToken);
+                }
             }
-            return Optional.of(response.users().stream().map(AwsCognitoUser::new).collect(Collectors.toList()));
         } catch (Exception e) {
-            logger.warn("Unable to get group {} members", groupName);
+            logger.warn("Unable to get membership for user: {}", username);
             if (logger.isDebugEnabled()) {
                 logger.debug("", e);
             }
-            return Optional.empty();
         } finally {
             lock.unlock();
         }
     }
 
     public Optional<List<AwsCognitoGroup>> getMembership(AwsCognitoConfiguration awsCognitoConfiguration, String username) {
-        lock.lock();
-        AdminListGroupsForUserRequest request = AdminListGroupsForUserRequest.builder()
-                .userPoolId(awsCognitoConfiguration.getUserPoolId())
-                .username(username)
-                .build();
-        try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
-            AdminListGroupsForUserResponse response = cognitoIdentityProviderClient.adminListGroupsForUser(request);
-            if (logger.isDebugEnabled()) {
-                logger.debug(response.toString());
-            }
-            if (!response.hasGroups() || CollectionUtils.isEmpty(response.groups())) {
-                return Optional.empty();
-            }
-            return Optional.of(response.groups().stream().map(AwsCognitoGroup::new).collect(Collectors.toList()));
-        } catch (Exception e) {
-            logger.warn("Unable to get membership for user: {}", username);
-            if (logger.isDebugEnabled()) {
-                logger.debug("", e);
-            }
+        List<GroupType> groups = new ArrayList<>();
+        getMembershipRecursively(awsCognitoConfiguration, username, groups, null);
+        if (groups.isEmpty()) {
             return Optional.empty();
-        } finally {
-            lock.unlock();
         }
+        return Optional.of(groups.stream().map(AwsCognitoGroup::new).collect(Collectors.toList()));
     }
 
     public Optional<String> login(String region, String clientId, String clientSecret, String username, String password) {
