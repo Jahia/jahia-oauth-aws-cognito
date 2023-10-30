@@ -3,6 +3,7 @@ package org.jahia.community.aws.cognito.jaxrs;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.api.content.JCRTemplate;
 import org.jahia.api.usermanager.JahiaUserManagerService;
+import org.jahia.bin.Logout;
 import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.community.aws.cognito.api.AwsCustomLoginService;
@@ -20,11 +21,13 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
 import java.security.InvalidAlgorithmParameterException;
@@ -114,5 +117,21 @@ public class AwsCognitoEndpoint {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(Arrays.copyOfRange(generatedData, 0, 32), "AES"), new IvParameterSpec(Arrays.copyOfRange(generatedData, 32, 32 + 16)));
         return new String(cipher.doFinal(encrypted), StandardCharsets.UTF_8);
+    }
+
+    @GET
+    @Path("/logout")
+    public Response logout(@Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) {
+        try {
+            String returnUrl = (String) httpServletRequest.getSession().getAttribute(AwsCognitoConstants.SESSION_OAUTH_AWS_COGNITO_RETURN_URL);
+            String logoutUrl = Logout.getLogoutServletPath();
+            if (StringUtils.isNotBlank(returnUrl)) {
+                logoutUrl += "?redirect=" + returnUrl;
+            }
+            return Response.status(Response.Status.FOUND).location(new URI(logoutUrl)).build();
+        } catch (Exception e) {
+            logger.error("");
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
 }
