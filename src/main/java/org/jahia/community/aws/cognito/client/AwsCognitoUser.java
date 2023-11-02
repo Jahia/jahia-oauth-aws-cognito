@@ -1,5 +1,6 @@
 package org.jahia.community.aws.cognito.client;
 
+import org.apache.commons.lang.StringUtils;
 import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.services.usermanager.JahiaUserImpl;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserType;
@@ -35,7 +36,7 @@ public class AwsCognitoUser implements Serializable {
             } else if ("sub".equals(attributeType.name())) {
                 sub = attributeType.value();
             } else {
-                attributes.put(attributeType.name(), attributeType.value());
+                attributes.put(StringUtils.replace(attributeType.name(), ":", "_"), attributeType.value());
             }
         });
         attributes.put(AwsCognitoConstants.USER_PROPERTY_STATUS, awsUser.userStatusAsString());

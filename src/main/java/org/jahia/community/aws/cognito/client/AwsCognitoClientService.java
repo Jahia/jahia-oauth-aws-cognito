@@ -1,8 +1,8 @@
 package org.jahia.community.aws.cognito.client;
 
 import com.auth0.jwt.JWT;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.shiro.util.CollectionUtils;
 import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
