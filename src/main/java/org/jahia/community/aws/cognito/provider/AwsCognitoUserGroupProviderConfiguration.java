@@ -7,6 +7,7 @@ import org.jahia.api.settings.SettingsBean;
 import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.exceptions.JahiaRuntimeException;
 import org.jahia.modules.external.users.UserGroupProviderConfiguration;
+import org.jahia.modules.jahiaoauth.service.JahiaOAuthConstants;
 import org.jahia.osgi.BundleUtils;
 import org.jahia.services.content.JCRContentUtils;
 import org.osgi.framework.BundleContext;
@@ -87,6 +88,15 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
         }
         if (parameters.containsKey("propValue." + AwsCognitoConstants.TARGET_SITE) && StringUtils.isNotBlank((String) parameters.get("propValue." + AwsCognitoConstants.TARGET_SITE))) {
             properties.put(AwsCognitoConstants.TARGET_SITE, parameters.get("propValue." + AwsCognitoConstants.TARGET_SITE));
+        }
+        if (parameters.containsKey("propValue." + AwsCognitoConstants.ENDPOINT)) {
+            properties.put(AwsCognitoConstants.ENDPOINT, parameters.get("propValue." + AwsCognitoConstants.ENDPOINT));
+        }
+        if (parameters.containsKey("propValue." + JahiaOAuthConstants.PROPERTY_API_KEY)) {
+            properties.put(JahiaOAuthConstants.PROPERTY_API_KEY, parameters.get("propValue." + JahiaOAuthConstants.PROPERTY_API_KEY));
+        }
+        if (parameters.containsKey("propValue." + JahiaOAuthConstants.PROPERTY_API_SECRET)) {
+            properties.put(JahiaOAuthConstants.PROPERTY_API_SECRET, parameters.get("propValue." + JahiaOAuthConstants.PROPERTY_API_SECRET));
         }
         if (parameters.containsKey("propValue." + AwsCognitoConstants.ACCESS_KEY_ID)) {
             properties.put(AwsCognitoConstants.ACCESS_KEY_ID, parameters.get("propValue." + AwsCognitoConstants.ACCESS_KEY_ID));

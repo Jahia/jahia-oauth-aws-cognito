@@ -5,6 +5,7 @@ import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
 import org.jahia.modules.external.users.ExternalUserGroupService;
+import org.jahia.modules.jahiaoauth.service.JahiaOAuthConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -63,7 +64,9 @@ public class AwsCognitoKarafConfiguration {
                 (String) dictionary.get(AwsCognitoConstants.ACCESS_KEY_ID),
                 (String) dictionary.get(AwsCognitoConstants.SECRET_ACCESS_KEY),
                 (String) dictionary.get(AwsCognitoConstants.USER_POOL_ID),
-                null, null, null));
+                (String) dictionary.get(AwsCognitoConstants.ENDPOINT),
+                (String) dictionary.get(JahiaOAuthConstants.PROPERTY_API_KEY),
+                (String) dictionary.get(JahiaOAuthConstants.PROPERTY_API_SECRET)));
         // Activate (again)
         awsCognitoUserGroupProvider.register();
     }

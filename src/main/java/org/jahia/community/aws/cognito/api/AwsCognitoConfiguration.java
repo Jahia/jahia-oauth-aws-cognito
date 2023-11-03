@@ -16,7 +16,7 @@ public class AwsCognitoConfiguration {
         this.targetSite = targetSite;
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
-        this.region = StringUtils.split(userPoolId, "_")[0];
+        this.region = userPoolId != null ? StringUtils.split(userPoolId, "_")[0] : null;
         this.userPoolId = userPoolId;
         this.endpoint = endpoint;
         this.clientId = clientId;

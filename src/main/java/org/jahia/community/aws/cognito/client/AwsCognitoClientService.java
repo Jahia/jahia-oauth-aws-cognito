@@ -27,11 +27,7 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.ListUsersRe
 import software.amazon.awssdk.services.cognitoidentityprovider.model.ListUsersResponse;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserType;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +38,6 @@ import java.util.stream.Collectors;
 @Component(service = AwsCognitoClientService.class)
 public class AwsCognitoClientService {
     private static final Logger logger = LoggerFactory.getLogger(AwsCognitoClientService.class);
-
-    private static final String HMAC_SHA256 = "HmacSHA256";
 
     private final ReentrantLock lock;
 
@@ -301,39 +295,30 @@ public class AwsCognitoClientService {
         return Optional.of(groups.stream().map(AwsCognitoGroup::new).collect(Collectors.toList()));
     }
 
-    public Optional<String> login(String region, String clientId, String clientSecret, String username, String password) {
+    public Optional<String> login(AwsCognitoConfiguration awsCognitoConfiguration, String username, String password) {
         lock.lock();
         Map<String, String> authParameters = new HashMap<>();
         authParameters.put("USERNAME", username);
         authParameters.put("PASSWORD", password);
-        authParameters.put("SECRET_HASH", calculateSecretHash(clientId, clientSecret, username));
-        try (CognitoIdentityProviderClient cognitoIdentityProviderClient = CognitoIdentityProviderClient.builder()
-                .region(Region.of(region)).build()) {
+        try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             InitiateAuthRequest request = InitiateAuthRequest.builder()
+                    .clientId(awsCognitoConfiguration.getClientId())
                     .authFlow(AuthFlowType.USER_PASSWORD_AUTH)
                     .authParameters(authParameters)
-                    .clientId(clientId)
                     .build();
             InitiateAuthResponse response = cognitoIdentityProviderClient.initiateAuth(request);
             if (logger.isDebugEnabled()) {
                 logger.debug(response.toString());
             }
             return Optional.ofNullable(response.authenticationResult()).map(result -> JWT.decode(result.idToken()).getSubject());
+        } catch (Exception e) {
+            logger.warn("Unable to log in user: {}", username);
+            if (logger.isDebugEnabled()) {
+                logger.debug("", e);
+            }
+            return Optional.empty();
         } finally {
             lock.unlock();
-        }
-    }
-
-    private static String calculateSecretHash(String clientId, String clientSecret, String userName) {
-        SecretKeySpec signingKey = new SecretKeySpec(clientSecret.getBytes(StandardCharsets.UTF_8), HMAC_SHA256);
-        try {
-            Mac mac = Mac.getInstance(HMAC_SHA256);
-            mac.init(signingKey);
-            mac.update(userName.getBytes(StandardCharsets.UTF_8));
-            byte[] rawHmac = mac.doFinal(clientId.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(rawHmac);
-        } catch (Exception e) {
-            throw new RuntimeException("Error while calculating secret hash", e);
         }
     }
 }
