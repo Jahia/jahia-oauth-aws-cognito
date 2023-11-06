@@ -52,7 +52,33 @@ public class AwsCognitoClientService {
                 .build();
     }
 
-    public Optional<AwsCognitoUser> getUser(AwsCognitoConfiguration awsCognitoConfiguration, String sub) {
+    public Optional<AwsCognitoUser> getUser(AwsCognitoConfiguration awsCognitoConfiguration, String username) {
+        lock.lock();
+        ListUsersRequest request = ListUsersRequest.builder()
+                .userPoolId(awsCognitoConfiguration.getUserPoolId())
+                .filter("username=\"" + username + "\"")
+                .build();
+        try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
+            ListUsersResponse response = cognitoIdentityProviderClient.listUsers(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug(response.toString());
+            }
+            if (!response.hasUsers() || CollectionUtils.isEmpty(response.users())) {
+                return Optional.empty();
+            }
+            return Optional.of(new AwsCognitoUser(response.users().get(0)));
+        } catch (Exception e) {
+            logger.warn("Unable to get user: {}", username);
+            if (logger.isDebugEnabled()) {
+                logger.debug("", e);
+            }
+            return Optional.empty();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public Optional<AwsCognitoUser> getUserBySub(AwsCognitoConfiguration awsCognitoConfiguration, String sub) {
         lock.lock();
         ListUsersRequest request = ListUsersRequest.builder()
                 .userPoolId(awsCognitoConfiguration.getUserPoolId())
@@ -157,8 +183,7 @@ public class AwsCognitoClientService {
     public Optional<List<AwsCognitoUser>> searchUsers(AwsCognitoConfiguration awsCognitoConfiguration, String search, long offset, long limit) {
         return getUsers(awsCognitoConfiguration, offset, limit)
                 .map(awsCognitoUsers -> awsCognitoUsers.stream()
-                        .filter(user -> StringUtils.contains(user.getSub(), search) ||
-                                StringUtils.contains(user.getUsername(), search) ||
+                        .filter(user -> StringUtils.contains(user.getUsername(), search) ||
                                 StringUtils.containsIgnoreCase(user.getFirstname(), search) ||
                                 StringUtils.containsIgnoreCase(user.getLastname(), search) ||
                                 StringUtils.containsIgnoreCase(user.getEmail(), search))

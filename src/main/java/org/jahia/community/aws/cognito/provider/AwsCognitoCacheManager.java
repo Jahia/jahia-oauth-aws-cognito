@@ -96,7 +96,7 @@ public class AwsCognitoCacheManager {
 
     public void cacheUser(String providerKey, String siteKey, AwsCognitoUser awsCognitoUser) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Caching user {} in site {}", awsCognitoUser.getSub(), siteKey);
+            logger.debug("Caching user {} in site {}", awsCognitoUser.getUsername(), siteKey);
         }
         ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(awsCognitoUser, MODULE_NAME);
         userCache.put(new Element(getCacheNameKey(providerKey, siteKey, awsCognitoUser.cacheJahiaUser(providerKey, siteKey)), cacheEntry));

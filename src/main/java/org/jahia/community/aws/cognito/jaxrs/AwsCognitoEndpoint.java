@@ -7,6 +7,7 @@ import org.jahia.bin.Logout;
 import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.community.aws.cognito.api.AwsCustomLoginService;
+import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
 import org.jahia.osgi.BundleUtils;
 import org.jahia.services.content.decorator.JCRUserNode;
@@ -56,19 +57,23 @@ public class AwsCognitoEndpoint {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
             String secretKey = connectorConfig.getProperty(AwsCognitoConstants.SECRET_KEY);
-            String userIdentifier = decryptUser(body, secretKey);
-            if (userIdentifier == null) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
-            JCRUserNode jcrUserNode = BundleUtils.getOsgiService(JahiaUserManagerService.class, null).lookupUser(userIdentifier);
-            if (jcrUserNode == null) {
-                logger.error("User {} not found", userIdentifier);
+            String sub = decryptUser(body, secretKey);
+            if (sub == null) {
+                logger.warn("No AWS user in body {}", body);
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
             AwsCognitoConfiguration awsCognitoConfiguration = AwsCognitoConstants.getAwsCognitoConfiguration(httpServletRequest);
             if (awsCognitoConfiguration == null) {
+                logger.warn("No AWS cognito configuration for site {}", siteKey);
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+
+            JCRUserNode jcrUserNode = BundleUtils.getOsgiService(AwsCognitoClientService.class, null).getUserBySub(awsCognitoConfiguration, sub)
+                    .map(user -> BundleUtils.getOsgiService(JahiaUserManagerService.class, null).lookupUser(user.getUsername()))
+                    .orElse(null);
+            if (jcrUserNode == null) {
+                logger.error("User not found for sub {}", sub);
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
@@ -78,7 +83,7 @@ public class AwsCognitoEndpoint {
             }
             AwsCustomLoginService awsCustomLoginService = awsCustomLoginServiceFactory.getAwsCustomLoginService(siteKey, jcrUserNode.getSession());
             if (awsCustomLoginService == null) {
-                logger.warn("No AWS custom login service to login the user: {}", userIdentifier);
+                logger.warn("No AWS custom login service to login the user: {}", jcrUserNode.getName());
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
             return awsCustomLoginService.login(jcrUserNode, httpServletRequest, siteKey, awsCognitoConfiguration);

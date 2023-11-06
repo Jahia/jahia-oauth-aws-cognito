@@ -14,7 +14,6 @@ import java.util.Properties;
 public class AwsCognitoUser implements Serializable {
     private static final long serialVersionUID = -200885001913981199L;
 
-    private String sub;
     private final String username;
     private String givenName;
     private String familyName;
@@ -33,8 +32,6 @@ public class AwsCognitoUser implements Serializable {
                 familyName = attributeType.value();
             } else if ("email".equals(attributeType.name())) {
                 email = attributeType.value();
-            } else if ("sub".equals(attributeType.name())) {
-                sub = attributeType.value();
             } else {
                 attributes.put(StringUtils.replace(attributeType.name(), ":", "_"), attributeType.value());
             }
@@ -44,10 +41,6 @@ public class AwsCognitoUser implements Serializable {
 
     public String getUsername() {
         return username;
-    }
-
-    public String getSub() {
-        return sub;
     }
 
     public String getFirstname() {
@@ -73,8 +66,8 @@ public class AwsCognitoUser implements Serializable {
         properties.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, email);
         properties.put(AwsCognitoConstants.USER_PROPERTY_ACCOUNTLOCKED, String.valueOf(attributes.containsKey(AwsCognitoConstants.USER_ATTRIBUTE_ACCOUNTLOCKED) && "true".equals(attributes.get(AwsCognitoConstants.USER_ATTRIBUTE_ACCOUNTLOCKED))));
         properties.putAll(attributes);
-        jahiaUser = new JahiaUserImpl(sub, sub, properties, false, providerKey, siteKey);
-        return sub;
+        jahiaUser = new JahiaUserImpl(username, username, properties, false, providerKey, siteKey);
+        return username;
     }
 
     public List<String> getGroups() {
