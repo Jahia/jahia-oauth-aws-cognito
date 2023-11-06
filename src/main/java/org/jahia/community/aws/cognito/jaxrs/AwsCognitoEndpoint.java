@@ -67,15 +67,18 @@ public class AwsCognitoEndpoint {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            AwsCustomLoginService awsCustomLoginService = BundleUtils.getOsgiService(AwsCustomLoginService.class, null);
-            if (awsCustomLoginService == null) {
-                logger.warn("No AWS custom login service to login the user: {}", userIdentifier);
-            }
             AwsCognitoConfiguration awsCognitoConfiguration = AwsCognitoConstants.getAwsCognitoConfiguration(httpServletRequest);
             if (awsCognitoConfiguration == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
+
+            AwsCustomLoginServiceFactory awsCustomLoginServiceFactory = BundleUtils.getOsgiService(AwsCustomLoginServiceFactory.class, null);
+            if (awsCustomLoginServiceFactory == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            AwsCustomLoginService awsCustomLoginService = awsCustomLoginServiceFactory.getAwsCustomLoginService(siteKey, jcrUserNode.getSession());
             if (awsCustomLoginService == null) {
+                logger.warn("No AWS custom login service to login the user: {}", userIdentifier);
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
             return awsCustomLoginService.login(jcrUserNode, httpServletRequest, siteKey, awsCognitoConfiguration);
