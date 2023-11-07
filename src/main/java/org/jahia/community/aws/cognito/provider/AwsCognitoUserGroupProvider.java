@@ -145,12 +145,12 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
 
         Optional<List<AwsCognitoUser>> awsCognitoUsers;
         if (searchCriteria.containsKey("*")) {
-            awsCognitoUsers = awsCognitoClientService.searchUsers(awsCognitoConfiguration, searchCriteria.getProperty("*").replace("*", ""));
+            awsCognitoUsers = awsCognitoClientService.searchUsers(awsCognitoConfiguration, Collections.singletonMap("*", searchCriteria.getProperty("*").replace("*", "")), (int) offset, (int) limit);
         } else if (searchCriteria.isEmpty()) {
-            awsCognitoUsers = awsCognitoClientService.getUsers(awsCognitoConfiguration, null);
+            awsCognitoUsers = awsCognitoClientService.getUsers(awsCognitoConfiguration, (int) offset, (int) limit);
         } else {
-            awsCognitoUsers = awsCognitoClientService.getUsers(awsCognitoConfiguration,
-                    searchCriteria.entrySet().stream().collect(Collectors.toMap(property -> property.getKey().toString().replace("*", ""), property -> property.getValue().toString())));
+            awsCognitoUsers = awsCognitoClientService.searchUsers(awsCognitoConfiguration,
+                    searchCriteria.entrySet().stream().collect(Collectors.toMap(property -> property.getKey().toString(), property -> property.getValue().toString().replace("*", ""))), (int) offset, (int) limit);
         }
         List<String> userIds = new ArrayList<>();
         awsCognitoUsers.orElse(Collections.emptyList())
@@ -184,11 +184,11 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
 
         Optional<List<AwsCognitoGroup>> awsCognitoGroups;
         if (searchCriteria.containsKey("*")) {
-            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, searchCriteria.getProperty("*").replace("*", ""));
+            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, searchCriteria.getProperty("*").replace("*", ""), (int) offset, (int) limit);
         } else if (searchCriteria.isEmpty()) {
-            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, null);
+            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, null, (int) offset, (int) limit);
         } else if (searchCriteria.containsKey(PROP_GROUPNAME)) {
-            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, searchCriteria.getProperty(PROP_GROUPNAME).replace("*", ""));
+            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, searchCriteria.getProperty(PROP_GROUPNAME).replace("*", ""), (int) offset, (int) limit);
         } else {
             logger.warn("Unable to search groups multiple attributes");
             awsCognitoGroups = Optional.empty();
