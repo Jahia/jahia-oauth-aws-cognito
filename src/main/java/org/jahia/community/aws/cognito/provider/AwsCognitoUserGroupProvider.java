@@ -2,6 +2,7 @@ package org.jahia.community.aws.cognito.provider;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
+import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
 import org.jahia.community.aws.cognito.client.AwsCognitoGroup;
 import org.jahia.community.aws.cognito.client.AwsCognitoUser;
@@ -55,7 +56,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         if (!isAvailable()) {
             throw new UserNotFoundException();
         }
-        return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, userId))
+        return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
                 .orElseThrow(() -> new UserNotFoundException("User '" + userId + "' not found.")).getJahiaUser();
     }
 
@@ -121,7 +122,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         List<String> groups = new ArrayList<>();
         awsCognitoClientService.getMembership(awsCognitoConfiguration, userId).orElse(Collections.emptyList())
                 .forEach(group -> groups.add(group.getName()));
-        awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, userId))
+        awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
                 .ifPresent(u -> u.setGroups(groups));
         return Collections.unmodifiableList(groups);
     }
@@ -138,8 +139,17 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         // search one user in the cache
         if (searchCriteria.containsKey(PROP_USERNAME) && searchCriteria.size() == 1 && !searchCriteria.getProperty(PROP_USERNAME).contains("*")) {
             String userId = searchCriteria.getProperty(PROP_USERNAME);
-            return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, userId))
+            return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
                     .map(awsCognitoUser -> Collections.singletonList(awsCognitoUser.getUsername()))
+                    .orElse(Collections.emptyList());
+        }
+
+        if (searchCriteria.containsKey(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL)) {
+            return awsCognitoClientService.getUser(awsCognitoConfiguration, AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL, searchCriteria.getProperty(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL).replace("*", ""))
+                    .map(awsCognitoUser -> {
+                        awsCognitoCacheManager.cacheUser(getKey(), getSiteKey(), awsCognitoUser);
+                        return Collections.singletonList(awsCognitoUser.getUsername());
+                    })
                     .orElse(Collections.emptyList());
         }
 
@@ -204,7 +214,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
 
     @Override
     public boolean verifyPassword(String userName, String userPassword) {
-        return awsCognitoClientService.getUser(awsCognitoConfiguration, userName)
+        return awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userName)
                 .filter(awsCognitoUser -> awsCognitoClientService.login(awsCognitoConfiguration, awsCognitoUser.getUsername(), userPassword)
                         .isPresent()).isPresent();
     }

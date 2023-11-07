@@ -53,11 +53,11 @@ public class AwsCognitoClientService {
                 .build();
     }
 
-    public Optional<AwsCognitoUser> getUser(AwsCognitoConfiguration awsCognitoConfiguration, String username) {
+    public Optional<AwsCognitoUser> getUser(AwsCognitoConfiguration awsCognitoConfiguration, String filterKey, String filterValue) {
         lock.lock();
         ListUsersRequest request = ListUsersRequest.builder()
                 .userPoolId(awsCognitoConfiguration.getUserPoolId())
-                .filter("username=\"" + username + "\"")
+                .filter(filterKey + "=\"" + filterValue + "\"")
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListUsersResponse response = cognitoIdentityProviderClient.listUsers(request);
@@ -69,7 +69,7 @@ public class AwsCognitoClientService {
             }
             return Optional.of(new AwsCognitoUser(response.users().get(0)));
         } catch (Exception e) {
-            logger.warn("Unable to get user: {}", username);
+            logger.warn("Unable to get user searching {}:{}", filterKey, filterValue);
             if (logger.isDebugEnabled()) {
                 logger.debug("", e);
             }

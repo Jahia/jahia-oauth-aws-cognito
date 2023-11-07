@@ -24,8 +24,8 @@ public class AwsCognitoUser implements Serializable {
         attributes = new Properties();
         attributes.putAll(awsUser.attributes().stream()
                 .collect(Collectors.toMap(attributeType -> StringUtils.replace(attributeType.name(), ":", "_"), AttributeType::value)));
-        if (attributes.containsKey("email")) {
-            attributes.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, attributes.get("email"));
+        if (attributes.containsKey(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL)) {
+            attributes.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, attributes.get(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL));
         }
         attributes.put(AwsCognitoConstants.USER_PROPERTY_STATUS, awsUser.userStatusAsString());
     }
