@@ -2,7 +2,6 @@ package org.jahia.community.aws.cognito.provider;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
-import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
 import org.jahia.community.aws.cognito.client.AwsCognitoGroup;
 import org.jahia.community.aws.cognito.client.AwsCognitoUser;
@@ -20,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -147,25 +145,12 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
 
         Optional<List<AwsCognitoUser>> awsCognitoUsers;
         if (searchCriteria.containsKey("*")) {
-            awsCognitoUsers = awsCognitoClientService.searchUsers(awsCognitoConfiguration, searchCriteria.getProperty("*").replace("*", ""), offset, limit);
+            awsCognitoUsers = awsCognitoClientService.searchUsers(awsCognitoConfiguration, searchCriteria.getProperty("*").replace("*", ""));
         } else if (searchCriteria.isEmpty()) {
-            awsCognitoUsers = awsCognitoClientService.getUsers(awsCognitoConfiguration, offset, limit);
+            awsCognitoUsers = awsCognitoClientService.getUsers(awsCognitoConfiguration, null);
         } else {
-            Map.Entry<Object, Object> e = searchCriteria.entrySet().stream().findFirst().get();
-            String key = (String) e.getKey(), value = (String) e.getValue();
-            switch (key) {
-                case AwsCognitoConstants.USER_PROPERTY_FIRSTNAME:
-                    awsCognitoUsers = awsCognitoClientService.searchUsersByFirstname(awsCognitoConfiguration, value.replace("*", ""), offset, limit);
-                    break;
-                case AwsCognitoConstants.USER_PROPERTY_LASTNAME:
-                    awsCognitoUsers = awsCognitoClientService.searchUsersByLastname(awsCognitoConfiguration, value.replace("*", ""), offset, limit);
-                    break;
-                case AwsCognitoConstants.USER_PROPERTY_EMAIL:
-                    awsCognitoUsers = awsCognitoClientService.searchUsersByEmail(awsCognitoConfiguration, value.replace("*", ""), offset, limit);
-                    break;
-                default:
-                    awsCognitoUsers = awsCognitoClientService.searchUsers(awsCognitoConfiguration, value.replace("*", ""), offset, limit);
-            }
+            awsCognitoUsers = awsCognitoClientService.getUsers(awsCognitoConfiguration,
+                    searchCriteria.entrySet().stream().collect(Collectors.toMap(property -> property.getKey().toString().replace("*", ""), property -> property.getValue().toString())));
         }
         List<String> userIds = new ArrayList<>();
         awsCognitoUsers.orElse(Collections.emptyList())
@@ -199,11 +184,14 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
 
         Optional<List<AwsCognitoGroup>> awsCognitoGroups;
         if (searchCriteria.containsKey("*")) {
-            awsCognitoGroups = awsCognitoClientService.searchGroups(awsCognitoConfiguration, searchCriteria.getProperty("*").replace("*", ""), offset, limit);
+            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, searchCriteria.getProperty("*").replace("*", ""));
         } else if (searchCriteria.isEmpty()) {
-            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, offset, limit);
+            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, null);
+        } else if (searchCriteria.containsKey(PROP_GROUPNAME)) {
+            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, searchCriteria.getProperty(PROP_GROUPNAME).replace("*", ""));
         } else {
-            awsCognitoGroups = awsCognitoClientService.searchGroups(awsCognitoConfiguration, ((String) searchCriteria.entrySet().stream().findFirst().get().getValue()).replace("*", ""), offset, limit);
+            logger.warn("Unable to search groups multiple attributes");
+            awsCognitoGroups = Optional.empty();
         }
         List<String> groupIds = new ArrayList<>();
         awsCognitoGroups.orElse(Collections.emptyList())

@@ -37,12 +37,8 @@ public final class AwsCognitoConstants {
     public static final String LOGIN_URL = "loginUrl";
     public static final String ENDPOINT = "endpoint";
 
-    public static final String USER_PROPERTY_FIRSTNAME = "j:firstName";
-    public static final String USER_PROPERTY_LASTNAME = "j:lastName";
     public static final String USER_PROPERTY_EMAIL = "j:email";
-    public static final String USER_PROPERTY_ACCOUNTLOCKED = "j:accountLocked";
     public static final String USER_PROPERTY_STATUS = "status";
-    public static final String USER_ATTRIBUTE_ACCOUNTLOCKED = "locked";
     public static final String USER_PROPERTY_LAST_CONNECTION_DATE = "j:lastConnectionDate";
 
     public static String getSiteKey(HttpServletRequest httpServletRequest, JCRTemplate jcrTemplate, JahiaSitesService jahiaSitesService) {

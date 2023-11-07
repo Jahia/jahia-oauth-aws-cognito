@@ -3,39 +3,30 @@ package org.jahia.community.aws.cognito.client;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.services.usermanager.JahiaUserImpl;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserType;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class AwsCognitoUser implements Serializable {
     private static final long serialVersionUID = -200885001913981199L;
 
     private final String username;
-    private String givenName;
-    private String familyName;
-    private String email;
     private JahiaUserImpl jahiaUser;
     private List<String> groups;
-    private final Map<String, String> attributes;
+    private final Properties attributes;
 
     public AwsCognitoUser(UserType awsUser) {
         username = awsUser.username();
-        attributes = new HashMap<>();
-        awsUser.attributes().forEach(attributeType -> {
-            if ("given_name".equals(attributeType.name())) {
-                givenName = attributeType.value();
-            } else if ("family_name".equals(attributeType.name())) {
-                familyName = attributeType.value();
-            } else if ("email".equals(attributeType.name())) {
-                email = attributeType.value();
-            } else {
-                attributes.put(StringUtils.replace(attributeType.name(), ":", "_"), attributeType.value());
-            }
-        });
+        attributes = new Properties();
+        attributes.putAll(awsUser.attributes().stream()
+                .collect(Collectors.toMap(attributeType -> StringUtils.replace(attributeType.name(), ":", "_"), AttributeType::value)));
+        if (attributes.containsKey("email")) {
+            attributes.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, attributes.get("email"));
+        }
         attributes.put(AwsCognitoConstants.USER_PROPERTY_STATUS, awsUser.userStatusAsString());
     }
 
@@ -43,16 +34,8 @@ public class AwsCognitoUser implements Serializable {
         return username;
     }
 
-    public String getFirstname() {
-        return givenName;
-    }
-
-    public String getLastname() {
-        return familyName;
-    }
-
-    public String getEmail() {
-        return email;
+    public Properties getAttributes() {
+        return attributes;
     }
 
     public JahiaUserImpl getJahiaUser() {
@@ -60,13 +43,7 @@ public class AwsCognitoUser implements Serializable {
     }
 
     public String cacheJahiaUser(String providerKey, String siteKey) {
-        Properties properties = new Properties();
-        properties.put(AwsCognitoConstants.USER_PROPERTY_FIRSTNAME, givenName);
-        properties.put(AwsCognitoConstants.USER_PROPERTY_LASTNAME, familyName);
-        properties.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, email);
-        properties.put(AwsCognitoConstants.USER_PROPERTY_ACCOUNTLOCKED, String.valueOf(attributes.containsKey(AwsCognitoConstants.USER_ATTRIBUTE_ACCOUNTLOCKED) && "true".equals(attributes.get(AwsCognitoConstants.USER_ATTRIBUTE_ACCOUNTLOCKED))));
-        properties.putAll(attributes);
-        jahiaUser = new JahiaUserImpl(username, username, properties, false, providerKey, siteKey);
+        jahiaUser = new JahiaUserImpl(username, username, attributes, false, providerKey, siteKey);
         return username;
     }
 

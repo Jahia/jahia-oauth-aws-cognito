@@ -104,9 +104,12 @@ public class AwsCognitoClientService {
         }
     }
 
-    private void getUsersRecursively(AwsCognitoConfiguration awsCognitoConfiguration, List<UserType> users, String paginationToken) {
+    private void getUsersRecursively(AwsCognitoConfiguration awsCognitoConfiguration, List<UserType> users, Map<String, String> filters, String paginationToken) {
         lock.lock();
         ListUsersRequest.Builder request = ListUsersRequest.builder().userPoolId(awsCognitoConfiguration.getUserPoolId());
+        if (filters != null) {
+            filters.forEach((key, value) -> request.filter(key + "=\"" + value + "\""));
+        }
         if (paginationToken != null) {
             request.paginationToken(paginationToken);
         }
@@ -119,7 +122,7 @@ public class AwsCognitoClientService {
                 users.addAll(response.users());
                 paginationToken = response.paginationToken();
                 if (paginationToken != null) {
-                    getUsersRecursively(awsCognitoConfiguration, users, paginationToken);
+                    getUsersRecursively(awsCognitoConfiguration, users, filters, paginationToken);
                 }
             }
         } catch (Exception e) {
@@ -132,9 +135,9 @@ public class AwsCognitoClientService {
         }
     }
 
-    public Optional<List<AwsCognitoUser>> getUsers(AwsCognitoConfiguration awsCognitoConfiguration, long offset, long limit) {
+    public Optional<List<AwsCognitoUser>> getUsers(AwsCognitoConfiguration awsCognitoConfiguration, Map<String, String> filters) {
         List<UserType> users = new ArrayList<>();
-        getUsersRecursively(awsCognitoConfiguration, users, null);
+        getUsersRecursively(awsCognitoConfiguration, users, filters, null);
         if (users.isEmpty()) {
             return Optional.empty();
         }
@@ -180,42 +183,12 @@ public class AwsCognitoClientService {
         return Optional.of(users.stream().map(AwsCognitoUser::new).collect(Collectors.toList()));
     }
 
-    public Optional<List<AwsCognitoUser>> searchUsers(AwsCognitoConfiguration awsCognitoConfiguration, String search, long offset, long limit) {
-        return getUsers(awsCognitoConfiguration, offset, limit)
-                .map(awsCognitoUsers -> awsCognitoUsers.stream()
-                        .filter(user -> StringUtils.contains(user.getUsername(), search) ||
-                                StringUtils.containsIgnoreCase(user.getFirstname(), search) ||
-                                StringUtils.containsIgnoreCase(user.getLastname(), search) ||
-                                StringUtils.containsIgnoreCase(user.getEmail(), search))
-                        .collect(Collectors.toList()));
-    }
-
-    public Optional<List<AwsCognitoUser>> searchUsersByFirstname(AwsCognitoConfiguration awsCognitoConfiguration, String firstname, long offset, long limit) {
-        return getUsers(awsCognitoConfiguration, offset, limit)
-                .map(awsCognitoUsers -> awsCognitoUsers.stream()
-                        .filter(user -> StringUtils.containsIgnoreCase(user.getFirstname(), firstname))
-                        .collect(Collectors.toList()));
-    }
-
-    public Optional<List<AwsCognitoUser>> searchUsersByLastname(AwsCognitoConfiguration awsCognitoConfiguration, String lastname, long offset, long limit) {
-        return getUsers(awsCognitoConfiguration, offset, limit)
-                .map(awsCognitoUsers -> awsCognitoUsers.stream()
-                        .filter(user -> StringUtils.containsIgnoreCase(user.getLastname(), lastname))
-                        .collect(Collectors.toList()));
-    }
-
-    public Optional<List<AwsCognitoUser>> searchUsersByEmail(AwsCognitoConfiguration awsCognitoConfiguration, String email, long offset, long limit) {
-        return getUsers(awsCognitoConfiguration, offset, limit)
-                .map(awsCognitoUsers -> awsCognitoUsers.stream()
-                        .filter(user -> StringUtils.containsIgnoreCase(user.getEmail(), email))
-                        .collect(Collectors.toList()));
-    }
-
-    public Optional<List<AwsCognitoGroup>> searchGroups(AwsCognitoConfiguration awsCognitoConfiguration, String search, long offset, long limit) {
-        return getGroups(awsCognitoConfiguration, offset, limit)
-                .map(awsCognitoGroups -> awsCognitoGroups.stream()
-                        .filter(group -> StringUtils.containsIgnoreCase(group.getName(), search))
-                        .collect(Collectors.toList()));
+    public Optional<List<AwsCognitoUser>> searchUsers(AwsCognitoConfiguration awsCognitoConfiguration, String search) {
+        return getUsers(awsCognitoConfiguration, null).map(awsCognitoUsers -> awsCognitoUsers.stream()
+                .filter(user -> StringUtils.contains(user.getUsername(), search) ||
+                        user.getAttributes().values().stream()
+                                .anyMatch(attribute -> StringUtils.containsIgnoreCase(attribute.toString(), search)))
+                .collect(Collectors.toList()));
     }
 
     public Optional<AwsCognitoGroup> getGroup(AwsCognitoConfiguration awsCognitoConfiguration, String groupName) {
@@ -272,13 +245,16 @@ public class AwsCognitoClientService {
         }
     }
 
-    public Optional<List<AwsCognitoGroup>> getGroups(AwsCognitoConfiguration awsCognitoConfiguration, long offset, long limit) {
+    public Optional<List<AwsCognitoGroup>> getGroups(AwsCognitoConfiguration awsCognitoConfiguration, String filter) {
         List<GroupType> groups = new ArrayList<>();
         getGroupsRecursively(awsCognitoConfiguration, groups, null);
         if (groups.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(groups.stream().map(AwsCognitoGroup::new).collect(Collectors.toList()));
+        return Optional.of(groups.stream()
+                .filter(group -> filter == null || StringUtils.containsIgnoreCase(group.groupName(), filter))
+                .map(AwsCognitoGroup::new)
+                .collect(Collectors.toList()));
     }
 
     private void getMembershipRecursively(AwsCognitoConfiguration awsCognitoConfiguration, String username, List<GroupType> groups, String nextToken) {
