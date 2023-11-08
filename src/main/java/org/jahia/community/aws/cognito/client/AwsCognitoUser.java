@@ -1,6 +1,5 @@
 package org.jahia.community.aws.cognito.client;
 
-import org.apache.commons.lang.StringUtils;
 import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.services.usermanager.JahiaUserImpl;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
@@ -22,8 +21,7 @@ public class AwsCognitoUser implements Serializable {
     public AwsCognitoUser(UserType awsUser) {
         username = awsUser.username();
         attributes = new Properties();
-        attributes.putAll(awsUser.attributes().stream()
-                .collect(Collectors.toMap(attributeType -> StringUtils.replace(attributeType.name(), ":", "_"), AttributeType::value)));
+        attributes.putAll(awsUser.attributes().stream().collect(Collectors.toMap(AttributeType::name, AttributeType::value)));
         if (attributes.containsKey(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL)) {
             attributes.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, attributes.get(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL));
         }
