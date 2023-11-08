@@ -1,6 +1,7 @@
 package org.jahia.community.aws.cognito.provider;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
@@ -20,9 +21,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
     private static final Logger logger = LoggerFactory.getLogger(AwsCognitoUserGroupProvider.class);
@@ -56,7 +59,8 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         if (!isAvailable()) {
             throw new UserNotFoundException();
         }
-        return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
+        return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId,
+                        () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
                 .orElseThrow(() -> new UserNotFoundException("User '" + userId + "' not found.")).getJahiaUser();
     }
 
@@ -122,7 +126,8 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         List<String> groups = new ArrayList<>();
         awsCognitoClientService.getMembership(awsCognitoConfiguration, userId).orElse(Collections.emptyList())
                 .forEach(group -> groups.add(group.getName()));
-        awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
+        awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId,
+                        () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
                 .ifPresent(u -> u.setGroups(groups));
         return Collections.unmodifiableList(groups);
     }
@@ -136,39 +141,53 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
             logger.debug("Search users: {}", searchCriteria);
         }
 
-        // search one user in the cache
+        // search one user in the cache by username
         if (searchCriteria.containsKey(PROP_USERNAME) && searchCriteria.size() == 1 && !searchCriteria.getProperty(PROP_USERNAME).contains("*")) {
             String userId = searchCriteria.getProperty(PROP_USERNAME);
-            return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
+            return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId,
+                            () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
                     .map(awsCognitoUser -> Collections.singletonList(awsCognitoUser.getUsername()))
                     .orElse(Collections.emptyList());
         }
 
+        // search one user in the cache by email
         if (searchCriteria.containsKey(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL)) {
-            return awsCognitoClientService.getUser(awsCognitoConfiguration, AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL, searchCriteria.getProperty(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL).replace("*", ""))
-                    .map(awsCognitoUser -> {
-                        awsCognitoCacheManager.cacheUser(getKey(), getSiteKey(), awsCognitoUser);
-                        return Collections.singletonList(awsCognitoUser.getUsername());
-                    })
+            String email = searchCriteria.getProperty(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL);
+            return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), email,
+                            () -> awsCognitoClientService.getUser(awsCognitoConfiguration, AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL, email.replace("*", "")))
+                    .map(awsCognitoUser -> Collections.singletonList(awsCognitoUser.getUsername()))
                     .orElse(Collections.emptyList());
         }
 
+        int iOffset = (int) offset;
+        int iLimit = (int) limit;
         Optional<List<AwsCognitoUser>> awsCognitoUsers;
-        if (searchCriteria.containsKey("*")) {
-            awsCognitoUsers = awsCognitoClientService.searchUsers(awsCognitoConfiguration, Collections.singletonMap("*", searchCriteria.getProperty("*").replace("*", "")), (int) offset, (int) limit);
-        } else if (searchCriteria.isEmpty()) {
-            awsCognitoUsers = awsCognitoClientService.getUsers(awsCognitoConfiguration, (int) offset, (int) limit);
+        if (searchCriteria.isEmpty()) {
+            // cache user with offset and limit
+            awsCognitoUsers = awsCognitoCacheManager.getUsers(getKey(), getSiteKey(), iOffset, iLimit,
+                    () -> awsCognitoClientService.getUsers(awsCognitoConfiguration, iOffset, iLimit));
         } else {
-            awsCognitoUsers = awsCognitoClientService.searchUsers(awsCognitoConfiguration,
-                    searchCriteria.entrySet().stream().collect(Collectors.toMap(property -> property.getKey().toString(), property -> property.getValue().toString().replace("*", ""))), (int) offset, (int) limit);
+            // cache all users
+            awsCognitoUsers = awsCognitoCacheManager.getUsers(getKey(), getSiteKey(), iOffset, -1,
+                            () -> awsCognitoClientService.getUsers(awsCognitoConfiguration, iOffset, -1))
+                    .map(l -> {
+                        Stream<AwsCognitoUser> users = l.stream();
+                        if (searchCriteria.containsKey("*")) {
+                            String search = searchCriteria.getProperty("*").replace("*", "");
+                            users = users.filter(user -> StringUtils.contains(user.getUsername(), search) ||
+                                    user.getAttributes().values().stream()
+                                            .anyMatch(attribute -> StringUtils.containsIgnoreCase(attribute.toString(), search)));
+                        } else {
+                            for (Map.Entry<Object, Object> entry : searchCriteria.entrySet()) {
+                                users = users.filter(user -> user.getAttributes().containsKey(entry.getKey().toString()) &&
+                                        StringUtils.containsIgnoreCase(user.getAttributes().get(entry.getKey().toString()).toString(),
+                                                entry.getValue().toString().replace("*", "")));
+                            }
+                        }
+                        return users.collect(Collectors.toList());
+                    }).map(list -> limit == -1 ? list : list.subList(iOffset, Math.min(list.size(), iOffset + iLimit)));
         }
-        List<String> userIds = new ArrayList<>();
-        awsCognitoUsers.orElse(Collections.emptyList())
-                .forEach(user -> {
-                    userIds.add(user.getUsername());
-                    awsCognitoCacheManager.cacheUser(getKey(), getSiteKey(), user);
-                });
-        return Collections.unmodifiableList(userIds);
+        return awsCognitoUsers.orElse(Collections.emptyList()).stream().map(AwsCognitoUser::getUsername).collect(Collectors.toList());
     }
 
     @Override

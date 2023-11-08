@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component(service = AwsCognitoClientService.class)
 public class AwsCognitoClientService {
@@ -57,7 +56,7 @@ public class AwsCognitoClientService {
         lock.lock();
         ListUsersRequest request = ListUsersRequest.builder()
                 .userPoolId(awsCognitoConfiguration.getUserPoolId())
-                .filter(filterKey + "=\"" + filterValue + "\"")
+                .filter(filterKey + "^=\"" + filterValue + "\"")
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListUsersResponse response = cognitoIdentityProviderClient.listUsers(request);
@@ -79,35 +78,10 @@ public class AwsCognitoClientService {
         }
     }
 
-    public Optional<AwsCognitoUser> getUserBySub(AwsCognitoConfiguration awsCognitoConfiguration, String sub) {
-        lock.lock();
-        ListUsersRequest request = ListUsersRequest.builder()
-                .userPoolId(awsCognitoConfiguration.getUserPoolId())
-                .filter("sub=\"" + sub + "\"")
-                .build();
-        try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
-            ListUsersResponse response = cognitoIdentityProviderClient.listUsers(request);
-            if (logger.isDebugEnabled()) {
-                logger.debug(response.toString());
-            }
-            if (!response.hasUsers() || CollectionUtils.isEmpty(response.users())) {
-                return Optional.empty();
-            }
-            return Optional.of(new AwsCognitoUser(response.users().get(0)));
-        } catch (Exception e) {
-            logger.warn("Unable to get user: {}", sub);
-            if (logger.isDebugEnabled()) {
-                logger.debug("", e);
-            }
-            return Optional.empty();
-        } finally {
-            lock.unlock();
-        }
-    }
-
     private void getUsersRecursively(AwsCognitoConfiguration awsCognitoConfiguration, List<UserType> users, int offset, int limit, String paginationToken) {
         lock.lock();
-        ListUsersRequest.Builder request = ListUsersRequest.builder().userPoolId(awsCognitoConfiguration.getUserPoolId());
+        ListUsersRequest.Builder request = ListUsersRequest.builder()
+                .userPoolId(awsCognitoConfiguration.getUserPoolId());
         if (paginationToken != null) {
             request.paginationToken(paginationToken);
         }
@@ -179,27 +153,6 @@ public class AwsCognitoClientService {
             return Optional.empty();
         }
         return Optional.of(users.stream().map(AwsCognitoUser::new).collect(Collectors.toList()));
-    }
-
-    private List<AwsCognitoUser> filterUsers(Stream<AwsCognitoUser> users, Map<String, String> filters) {
-        if (filters.containsKey("*")) {
-            String search = filters.get("*");
-            users = users.filter(user -> StringUtils.contains(user.getUsername(), search) ||
-                    user.getAttributes().values().stream()
-                            .anyMatch(attribute -> StringUtils.containsIgnoreCase(attribute.toString(), search)));
-        } else {
-            for (Map.Entry<String, String> filter : filters.entrySet()) {
-                users = users.filter(user -> user.getAttributes().containsKey(filter.getKey()) &&
-                        StringUtils.containsIgnoreCase(user.getAttributes().get(filter.getKey()).toString(), filter.getValue()));
-            }
-        }
-        return users.collect(Collectors.toList());
-    }
-
-    public Optional<List<AwsCognitoUser>> searchUsers(AwsCognitoConfiguration awsCognitoConfiguration, Map<String, String> filters, int offset, int limit) {
-        return getUsers(awsCognitoConfiguration, offset, -1)
-                .map(awsCognitoUsers -> filterUsers(awsCognitoUsers.stream(), filters))
-                .map(list -> limit == -1 ? list : list.subList(offset, Math.min(list.size(), offset + limit)));
     }
 
     public Optional<AwsCognitoGroup> getGroup(AwsCognitoConfiguration awsCognitoConfiguration, String groupName) {

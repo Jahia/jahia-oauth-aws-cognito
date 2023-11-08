@@ -18,6 +18,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -82,24 +83,37 @@ public class AwsCognitoCacheManager {
         }
     }
 
-    public Optional<AwsCognitoUser> getUser(String providerKey, String siteKey, String username) {
-        return Optional.ofNullable((AwsCognitoUser) CacheHelper.getObjectValue(userCache, getCacheNameKey(providerKey, siteKey, username)));
+    public Optional<AwsCognitoUser> getUser(String providerKey, String siteKey, String attribute) {
+        return Optional.ofNullable((AwsCognitoUser) CacheHelper.getObjectValue(userCache, getCacheNameKey(providerKey, siteKey, attribute)));
     }
 
-    public Optional<AwsCognitoUser> getOrRefreshUser(String providerKey, String siteKey, String username, Supplier<Optional<AwsCognitoUser>> supplier) {
-        return getUser(providerKey, siteKey, username).map(Optional::of).orElseGet(() -> {
+    public Optional<AwsCognitoUser> getOrRefreshUser(String providerKey, String siteKey, String attribute, Supplier<Optional<AwsCognitoUser>> supplier) {
+        return getUser(providerKey, siteKey, attribute).map(Optional::of).orElseGet(() -> {
             Optional<AwsCognitoUser> awsCognitoUser = supplier.get();
-            awsCognitoUser.ifPresent(user -> cacheUser(providerKey, siteKey, user));
+            awsCognitoUser.ifPresent(user -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Caching user {} in site {}", user.getUsername(), siteKey);
+                }
+                ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(user, MODULE_NAME);
+                userCache.put(new Element(getCacheNameKey(providerKey, siteKey, user.cacheJahiaUser(providerKey, siteKey)), cacheEntry));
+            });
             return awsCognitoUser;
         });
     }
 
-    public void cacheUser(String providerKey, String siteKey, AwsCognitoUser awsCognitoUser) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Caching user {} in site {}", awsCognitoUser.getUsername(), siteKey);
-        }
-        ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(awsCognitoUser, MODULE_NAME);
-        userCache.put(new Element(getCacheNameKey(providerKey, siteKey, awsCognitoUser.cacheJahiaUser(providerKey, siteKey)), cacheEntry));
+    public Optional<List<AwsCognitoUser>> getUsers(String providerKey, String siteKey, int offset, int limit, Supplier<Optional<List<AwsCognitoUser>>> supplier) {
+        String cacheKey = "all_" + offset + "_" + limit;
+        return Optional.ofNullable((List<AwsCognitoUser>) CacheHelper.getObjectValue(userCache, getCacheNameKey(providerKey, siteKey, cacheKey))).map(Optional::of).orElseGet(() -> {
+            Optional<List<AwsCognitoUser>> awsCognitoUsers = supplier.get();
+            awsCognitoUsers.ifPresent(users -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Caching users {} in site {}", cacheKey, siteKey);
+                }
+                ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(users, MODULE_NAME);
+                userCache.put(new Element(getCacheNameKey(providerKey, siteKey, cacheKey), cacheEntry));
+            });
+            return awsCognitoUsers;
+        });
     }
 
     public Optional<AwsCognitoGroup> getGroup(String providerKey, String siteKey, String groupname) {
