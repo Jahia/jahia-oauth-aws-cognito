@@ -98,7 +98,7 @@ public class AwsCognitoLoginUrlProvider implements LoginUrlProvider {
         }
         if (connectorConfig.getBooleanProperty(AwsCognitoConstants.WITH_CUSTOM_LOGIN)) {
             String loginUrl = connectorConfig.getProperty(AwsCognitoConstants.LOGIN_URL);
-            return StringUtils.isNotBlank(loginUrl) ? loginUrl + "&siteKey=" + siteKey : null;
+            return StringUtils.isNotBlank(loginUrl) ? loginUrl + "&app=jahia&action=login&siteKey=" + siteKey : null;
         }
         return jahiaOAuthService.getAuthorizationUrl(connectorConfig, sessionId, null);
     }
