@@ -69,7 +69,7 @@ public class AwsCognitoEndpoint {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            JCRUserNode jcrUserNode = BundleUtils.getOsgiService(AwsCognitoClientService.class, null).getUserBySub(awsCognitoConfiguration, sub)
+            JCRUserNode jcrUserNode = BundleUtils.getOsgiService(AwsCognitoClientService.class, null).getUser(awsCognitoConfiguration, "sub", sub)
                     .map(user -> BundleUtils.getOsgiService(JahiaUserManagerService.class, null).lookupUser(user.getUsername()))
                     .orElse(null);
             if (jcrUserNode == null) {
