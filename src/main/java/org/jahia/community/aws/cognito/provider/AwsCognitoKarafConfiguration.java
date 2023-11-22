@@ -66,7 +66,9 @@ public class AwsCognitoKarafConfiguration {
                 (String) dictionary.get(AwsCognitoConstants.USER_POOL_ID),
                 (String) dictionary.get(AwsCognitoConstants.ENDPOINT),
                 (String) dictionary.get(JahiaOAuthConstants.PROPERTY_API_KEY),
-                (String) dictionary.get(JahiaOAuthConstants.PROPERTY_API_SECRET)));
+                (String) dictionary.get(JahiaOAuthConstants.PROPERTY_API_SECRET),
+                providerKey,
+                awsCognitoUserGroupProvider.getSiteKey()));
         // Activate (again)
         awsCognitoUserGroupProvider.register();
     }

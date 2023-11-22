@@ -19,7 +19,7 @@
                 helperService.errorToast(i18nService.message('label.missingMandatoryProperties'));
                 return false;
             }
-            if (vm.withCustomLogin && (!vm.secretKey || !vm.loginUrl || !vm.accessKeyId || !vm.secretAccessKey || !vm.userPoolId)) {
+            if (vm.withCustomLogin && (!vm.secretKey || !vm.loginUrl || !vm.accessKeyId || !vm.secretAccessKey || !vm.userPoolId || !vm.providerKey || !vm.siteKey)) {
                 helperService.errorToast(i18nService.message('label.missingMandatoryProperties'));
                 return false;
             }
@@ -38,7 +38,9 @@
                     loginUrl: vm.loginUrl,
                     accessKeyId: vm.accessKeyId,
                     secretAccessKey: vm.secretAccessKey,
-                    userPoolId: vm.userPoolId
+                    userPoolId: vm.userPoolId,
+                    providerKey: vm.providerKey,
+                    siteKey: vm.siteKey
                 }
             }).success(() => {
                 vm.connectorHasSettings = true;
@@ -55,7 +57,7 @@
             vm.expandedCard = !vm.expandedCard;
         };
 
-        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'region', 'withCustomLogin', 'secretKey', 'loginUrl', 'accessKeyId', 'secretAccessKey', 'userPoolId']).success(data => {
+        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'region', 'withCustomLogin', 'secretKey', 'loginUrl', 'accessKeyId', 'secretAccessKey', 'userPoolId', 'providerKey', 'siteKey']).success(data => {
             if (data && !angular.equals(data, {})) {
                 vm.connectorHasSettings = true;
                 vm.expandedCard = true;
@@ -70,6 +72,8 @@
                 vm.accessKeyId = data.accessKeyId;
                 vm.secretAccessKey = data.secretAccessKey;
                 vm.userPoolId = data.userPoolId;
+                vm.providerKey = data.providerKey;
+                vm.siteKey = data.siteKey;
             } else {
                 vm.connectorHasSettings = false;
                 vm.enabled = false;

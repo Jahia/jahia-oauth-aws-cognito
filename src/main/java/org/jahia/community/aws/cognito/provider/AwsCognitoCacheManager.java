@@ -89,16 +89,19 @@ public class AwsCognitoCacheManager {
 
     public Optional<AwsCognitoUser> getOrRefreshUser(String providerKey, String siteKey, String attribute, Supplier<Optional<AwsCognitoUser>> supplier) {
         return getUser(providerKey, siteKey, attribute).map(Optional::of).orElseGet(() -> {
+            logger.debug("User {} not found in the cache", attribute);
             Optional<AwsCognitoUser> awsCognitoUser = supplier.get();
-            awsCognitoUser.ifPresent(user -> {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Caching user {} in site {}", user.getUsername(), siteKey);
-                }
-                ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(user, MODULE_NAME);
-                userCache.put(new Element(getCacheNameKey(providerKey, siteKey, user.cacheJahiaUser(providerKey, siteKey)), cacheEntry));
-            });
+            awsCognitoUser.ifPresent(user -> cacheUser(providerKey, siteKey, user));
             return awsCognitoUser;
         });
+    }
+
+    public void cacheUser(String providerKey, String siteKey, AwsCognitoUser awsCognitoUser) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Caching user {} in site {}", awsCognitoUser.getUsername(), siteKey);
+        }
+        ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(awsCognitoUser, MODULE_NAME);
+        userCache.put(new Element(getCacheNameKey(providerKey, siteKey, awsCognitoUser.cacheJahiaUser(providerKey, siteKey)), cacheEntry));
     }
 
     public Optional<List<AwsCognitoUser>> getUsers(String providerKey, String siteKey, int offset, int limit, Supplier<Optional<List<AwsCognitoUser>>> supplier) {
@@ -122,6 +125,7 @@ public class AwsCognitoCacheManager {
 
     public Optional<AwsCognitoGroup> getOrRefreshGroup(String providerKey, String siteKey, String groupname, Supplier<Optional<AwsCognitoGroup>> supplier) {
         return getGroup(providerKey, siteKey, groupname).map(Optional::of).orElseGet(() -> {
+            logger.debug("Group {} not found in the cache", groupname);
             Optional<AwsCognitoGroup> awsCognitoGroup = supplier.get();
             awsCognitoGroup.ifPresent(group -> cacheGroup(providerKey, siteKey, group));
             return awsCognitoGroup;

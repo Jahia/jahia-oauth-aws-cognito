@@ -89,9 +89,11 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         // List of members in the groupId
         Optional<AwsCognitoGroup> group = awsCognitoCacheManager.getGroup(getKey(), getSiteKey(), groupId);
         if (!group.isPresent()) {
+            logger.warn("Unable to get group members {}", groupId);
             return Collections.emptyList();
         }
         if (CollectionUtils.isNotEmpty(group.get().getMembers())) {
+            logger.debug("Group member {} are in cache", groupId);
             return group.get().getMembers().stream().map(member -> new Member(member, Member.MemberType.USER))
                     .collect(Collectors.toList());
         }
@@ -117,17 +119,18 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         String userId = member.getName();
         Optional<AwsCognitoUser> user = awsCognitoCacheManager.getUser(getKey(), getSiteKey(), userId);
         if (!user.isPresent()) {
+            logger.warn("Unable to user groups {}", userId);
             return Collections.emptyList();
         }
         if (CollectionUtils.isNotEmpty(user.get().getGroups())) {
+            logger.debug("User groups {} are in cache", userId);
             return user.get().getGroups();
         }
 
         List<String> groups = new ArrayList<>();
         awsCognitoClientService.getMembership(awsCognitoConfiguration, userId).orElse(Collections.emptyList())
                 .forEach(group -> groups.add(group.getName()));
-        awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId,
-                        () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
+        awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
                 .ifPresent(u -> u.setGroups(groups));
         return Collections.unmodifiableList(groups);
     }

@@ -52,7 +52,7 @@
             </div>
 
             <div layout="row" ng-show="awsCognito.withCustomLogin">
-                <md-input-container flex="25">
+                <md-input-container flex>
                     <label message-key="label.secretKey"></label>
                     <input type="password" ng-model="awsCognito.secretKey" name="secretKey" required/>
                     <div ng-messages="awsCognitoForm.secretKey.$error" role="alert">
@@ -60,13 +60,33 @@
                     </div>
                 </md-input-container>
 
-                <div flex="5"></div>
+                <div flex></div>
 
-                <md-input-container flex="70">
+                <md-input-container flex>
                     <label message-key="label.loginUrl"></label>
                     <input type="text" ng-model="awsCognito.loginUrl" name="loginUrl" required/>
                     <div ng-messages="awsCognitoForm.loginUrl.$error" role="alert">
                         <div ng-message="required" message-key="error.loginUrl.required"></div>
+                    </div>
+                </md-input-container>
+
+                <div flex></div>
+
+                <md-input-container flex>
+                    <label message-key="label.providerKey"></label>
+                    <input type="text" ng-model="awsCognito.providerKey" name="providerKey" required/>
+                    <div ng-messages="awsCognitoForm.providerKey.$error" role="alert">
+                        <div ng-message="required" message-key="error.providerKey.required"></div>
+                    </div>
+                </md-input-container>
+
+                <div flex></div>
+
+                <md-input-container flex>
+                    <label message-key="label.siteKey"></label>
+                    <input type="text" ng-model="awsCognito.siteKey" name="siteKey" required/>
+                    <div ng-messages="awsCognitoForm.siteKey.$error" role="alert">
+                        <div ng-message="required" message-key="error.siteKey.required"></div>
                     </div>
                 </md-input-container>
             </div>

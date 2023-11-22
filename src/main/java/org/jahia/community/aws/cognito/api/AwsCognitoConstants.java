@@ -36,6 +36,8 @@ public final class AwsCognitoConstants {
     public static final String WITH_CUSTOM_LOGIN = "withCustomLogin";
     public static final String LOGIN_URL = "loginUrl";
     public static final String ENDPOINT = "endpoint";
+    public static final String PROPERTY_PROVIDER_KEY = "providerKey";
+    public static final String PROPERTY_SITE_KEY = "siteKey";
 
     public static final String CUSTOM_PROPERTY_EMAIL = "email";
     public static final String USER_PROPERTY_EMAIL = "j:email";
@@ -92,7 +94,9 @@ public final class AwsCognitoConstants {
                 connectorConfig.getProperty(AwsCognitoConstants.USER_POOL_ID),
                 connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT),
                 connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_KEY),
-                connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_SECRET)
+                connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_SECRET),
+                connectorConfig.getProperty(AwsCognitoConstants.PROPERTY_PROVIDER_KEY),
+                connectorConfig.getProperty(AwsCognitoConstants.PROPERTY_SITE_KEY)
         );
     }
 
