@@ -21,6 +21,8 @@ This module is a community module to show how to implement an authentication bas
   - `accessKeyId`: AWS access key ID
   - `secretAccessKey`: AWS secret access key
   - `userPoolId`: AWS user pool ID
+  - `clientId`: AWS client ID
+  - `clientSecret`: AWS client secret
 - Go to Site settings: set up the fields and toggle the slide `Activate` otherwise the autentication url will not work
   - OpenID Connect implementation:
     - `clientId`: AWS client ID

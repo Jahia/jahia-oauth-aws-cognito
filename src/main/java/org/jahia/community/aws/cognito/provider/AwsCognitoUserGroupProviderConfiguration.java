@@ -101,6 +101,9 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
         if (parameters.containsKey("propValue." + JahiaOAuthConstants.PROPERTY_API_KEY)) {
             properties.put(JahiaOAuthConstants.PROPERTY_API_KEY, parameters.get("propValue." + JahiaOAuthConstants.PROPERTY_API_KEY));
         }
+        if (parameters.containsKey("propValue." + JahiaOAuthConstants.PROPERTY_API_SECRET)) {
+            properties.put(JahiaOAuthConstants.PROPERTY_API_SECRET, parameters.get("propValue." + JahiaOAuthConstants.PROPERTY_API_SECRET));
+        }
         return properties;
     }
 

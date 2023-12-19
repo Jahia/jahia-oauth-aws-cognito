@@ -105,7 +105,8 @@ public final class AwsCognitoConstants {
                 connectorConfig.getProperty(AwsCognitoConstants.ACCESS_KEY_ID),
                 connectorConfig.getProperty(AwsCognitoConstants.SECRET_ACCESS_KEY),
                 connectorConfig.getProperty(AwsCognitoConstants.USER_POOL_ID),
-                connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_KEY));
+                connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_KEY),
+                connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_SECRET));
     }
 
     public static ConnectorConfig getConnectorConfig(String siteKey) {

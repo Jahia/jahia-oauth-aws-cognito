@@ -28,6 +28,8 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.ListUsersRe
 import software.amazon.awssdk.services.cognitoidentityprovider.model.ListUsersResponse;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserType;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -41,6 +43,8 @@ import java.util.stream.Collectors;
 @Component(service = AwsCognitoClientService.class)
 public class AwsCognitoClientService {
     private static final Logger logger = LoggerFactory.getLogger(AwsCognitoClientService.class);
+
+    private static final String HMAC_SHA256 = "HmacSHA256";
 
     private final ReentrantLock lock;
 
@@ -268,6 +272,7 @@ public class AwsCognitoClientService {
         Map<String, String> authParameters = new HashMap<>();
         authParameters.put("USERNAME", username);
         authParameters.put("PASSWORD", password);
+        authParameters.put("SECRET_HASH", calculateSecretHash(awsCognitoConfiguration.getClientId(), awsCognitoConfiguration.getClientSecret(), username));
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             InitiateAuthRequest request = InitiateAuthRequest.builder()
                     .clientId(awsCognitoConfiguration.getClientId())
@@ -296,6 +301,18 @@ public class AwsCognitoClientService {
             return Optional.empty();
         } finally {
             lock.unlock();
+        }
+    }
+
+    private static String calculateSecretHash(String clientId, String clientSecret, String userName) {
+        try {
+            SecretKeySpec signingKey = new SecretKeySpec(clientSecret.getBytes(StandardCharsets.UTF_8), HMAC_SHA256);
+            Mac mac = Mac.getInstance(HMAC_SHA256);
+            mac.init(signingKey);
+            mac.update(userName.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(mac.doFinal(clientId.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception e) {
+            throw new RuntimeException("Error while calculating secret hash", e);
         }
     }
 }
