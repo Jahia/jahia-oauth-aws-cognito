@@ -4,7 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jahia.bin.Action;
 import org.jahia.bin.ActionResult;
 import org.jahia.bin.Render;
-import org.jahia.community.aws.cognito.connector.AwsCognitoConstants;
+import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.modules.jahiaauth.service.SettingsService;
 import org.jahia.modules.jahiaoauth.service.JahiaOAuthService;
 import org.jahia.services.content.JCRSessionWrapper;
@@ -48,7 +48,7 @@ public class AwsCognitoConnectAction extends Action {
         if (StringUtils.isNotBlank(referer)) {
             httpServletRequest.getSession(false).setAttribute(AwsCognitoConstants.SESSION_OAUTH_AWS_COGNITO_RETURN_URL, referer);
         }
-        String authorizationUrl = AwsCognitoConstants.getAuthorizationUrl(renderContext.getSite().getSiteKey(), httpServletRequest.getSession().getId(), settingsService, jahiaOAuthService, false);
+        String authorizationUrl = AwsCognitoConstants.getAuthorizationUrl(renderContext.getSite().getSiteKey(), httpServletRequest.getSession().getId(), settingsService, jahiaOAuthService);
         if (authorizationUrl == null) {
             return ActionResult.BAD_REQUEST;
         }

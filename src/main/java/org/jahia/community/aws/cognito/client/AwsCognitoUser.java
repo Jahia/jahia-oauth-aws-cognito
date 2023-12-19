@@ -1,6 +1,6 @@
 package org.jahia.community.aws.cognito.client;
 
-import org.jahia.community.aws.cognito.connector.AwsCognitoConstants;
+import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.services.usermanager.JahiaUserImpl;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserType;
@@ -27,7 +27,6 @@ public class AwsCognitoUser implements Serializable {
             email = (String) attributes.get(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL);
             attributes.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, email);
         }
-        attributes.put(AwsCognitoConstants.USER_PROPERTY_STATUS, awsUser.userStatusAsString());
     }
 
     public String getUsername() {

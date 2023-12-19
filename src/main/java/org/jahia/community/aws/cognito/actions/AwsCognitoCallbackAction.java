@@ -6,7 +6,7 @@ import org.jahia.api.usermanager.JahiaUserManagerService;
 import org.jahia.bin.Action;
 import org.jahia.bin.ActionResult;
 import org.jahia.bin.Render;
-import org.jahia.community.aws.cognito.connector.AwsCognitoConstants;
+import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
 import org.jahia.modules.jahiaauth.service.JahiaAuthConstants;
 import org.jahia.modules.jahiaauth.service.SettingsService;
