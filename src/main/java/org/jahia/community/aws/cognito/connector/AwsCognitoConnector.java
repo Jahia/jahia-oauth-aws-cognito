@@ -41,7 +41,7 @@ public class AwsCognitoConnector implements OAuthConnectorService {
 
     @Override
     public String getProtectedResourceUrl(ConnectorConfig connectorConfig) {
-        return connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT) + "/oauth2/userInfo";
+        return connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT) + "/oauth2/userinfo";
     }
 
     @Override
