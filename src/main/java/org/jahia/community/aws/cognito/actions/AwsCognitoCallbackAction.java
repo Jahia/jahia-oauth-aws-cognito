@@ -5,7 +5,7 @@ import org.jahia.api.content.JCRTemplate;
 import org.jahia.bin.Action;
 import org.jahia.bin.ActionResult;
 import org.jahia.bin.Render;
-import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
+import org.jahia.community.aws.cognito.connector.AwsCognitoConstants;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
 import org.jahia.modules.jahiaauth.service.SettingsService;
 import org.jahia.modules.jahiaoauth.service.JahiaOAuthService;
@@ -56,13 +56,14 @@ public class AwsCognitoCallbackAction extends Action {
     }
 
     public AwsCognitoCallbackAction() {
+        // TODO: to be executed on the site
         setName(NAME);
         setRequireAuthenticatedUser(false);
         setRequiredMethods(Render.METHOD_GET);
     }
 
     @Override
-    public ActionResult doExecute(HttpServletRequest httpServletRequest, RenderContext renderContext, Resource resource, JCRSessionWrapper jcrSessionWrapper, Map<String, List<String>> parameters, URLResolver urlResolver) throws Exception {
+    public ActionResult doExecute(HttpServletRequest httpServletRequest, RenderContext renderContext, Resource resource, JCRSessionWrapper jcrSessionWrapper, Map<String, List<String>> parameters, URLResolver urlResolver) {
         if (parameters.containsKey("code")) {
             final String token = getRequiredParameter(parameters, "code");
             if (StringUtils.isBlank(token)) {

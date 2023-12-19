@@ -1,6 +1,6 @@
 package org.jahia.community.aws.cognito.client;
 
-import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
+import org.jahia.community.aws.cognito.connector.AwsCognitoConstants;
 import org.jahia.services.usermanager.JahiaUserImpl;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserType;

@@ -1,7 +1,8 @@
 package org.jahia.community.aws.cognito.connector;
 
 import com.github.scribejava.core.builder.api.DefaultApi20;
-import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
+import com.github.scribejava.core.oauth2.clientauthentication.ClientAuthentication;
+import com.github.scribejava.core.oauth2.clientauthentication.RequestBodyAuthenticationScheme;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -9,24 +10,27 @@ import java.util.concurrent.ConcurrentMap;
 public final class AwsCognitoApi20 extends DefaultApi20 {
     private static final ConcurrentMap<String, AwsCognitoApi20> INSTANCES = new ConcurrentHashMap<>();
     private final String endpoint;
-    private final String region;
 
-    private AwsCognitoApi20(String endpoint, String region) {
+    private AwsCognitoApi20(String endpoint) {
         this.endpoint = endpoint;
-        this.region = region;
     }
 
-    public static AwsCognitoApi20 instance(String endpoint, String region) {
-        return INSTANCES.computeIfAbsent(endpoint + "###" + region, key -> new AwsCognitoApi20(endpoint, region));
+    public static AwsCognitoApi20 instance(String endpoint) {
+        return INSTANCES.computeIfAbsent(endpoint, key -> new AwsCognitoApi20(endpoint));
     }
 
     @Override
     public String getAccessTokenEndpoint() {
-        return String.format(AwsCognitoConstants.URL, endpoint, region) + "/oauth2/token";
+        return endpoint + "/oauth2/token";
     }
 
     @Override
     protected String getAuthorizationBaseUrl() {
-        return String.format(AwsCognitoConstants.URL, endpoint, region) + "/oauth2/authorize";
+        return endpoint + "/oauth2/authorize";
+    }
+
+    @Override
+    public ClientAuthentication getClientAuthentication() {
+        return RequestBodyAuthenticationScheme.instance();
     }
 }

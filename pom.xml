@@ -66,7 +66,6 @@
     <properties>
         <jahia.plugin.version>6.8</jahia.plugin.version>
         <jahia-depends>default, jahia-authentication, jahia-oauth</jahia-depends>
-        <export-package>software.amazon.awssdk.*, org.jahia.community.aws.cognito.api</export-package>
     </properties>
 
     <repositories>
@@ -89,10 +88,6 @@
             <id>ps-releases</id>
             <url>https://devtools.jahia.com/nexus/content/repositories/jahia-professional-services-public-repository</url>
         </repository>
-        <snapshotRepository>
-            <id>ps-snapshots</id>
-            <url>https://devtools.jahia.com/nexus/content/repositories/jahia-professional-services-private-repository</url>
-        </snapshotRepository>
     </distributionManagement>
 
     <dependencyManagement>
@@ -152,11 +147,6 @@
             <version>1.70</version>
         </dependency>
         <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
-            <version>3.3.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.jahia.modules</groupId>
             <artifactId>jahia-authentication</artifactId>
             <version>1.7.0</version>
@@ -166,12 +156,6 @@
             <groupId>org.jahia.modules</groupId>
             <artifactId>jahia-oauth</artifactId>
             <version>3.3.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.bundles</groupId>
-            <artifactId>jaxrs-ri</artifactId>
-            <version>${jersey.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -184,8 +168,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <JAX-RS-Alias>/cognito</JAX-RS-Alias>
-                        <JAX-RS-Application>org.jahia.community.aws.cognito.jaxrs.JaxRsConfig</JAX-RS-Application>
                         <_dsannotations>*</_dsannotations>
                     </instructions>
                 </configuration>

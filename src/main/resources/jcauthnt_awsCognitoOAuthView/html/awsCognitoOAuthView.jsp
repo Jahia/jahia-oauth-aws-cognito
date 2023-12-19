@@ -43,103 +43,9 @@
                 <md-switch ng-model="awsCognito.enabled">
                     <span message-key="label.activate"></span>
                 </md-switch>
-
-                <div flex></div>
-
-                <md-switch ng-model="awsCognito.withCustomLogin">
-                    <span message-key="label.customLogin"></span>
-                </md-switch>
             </div>
 
-            <div layout="row" ng-show="awsCognito.withCustomLogin">
-                <md-input-container flex>
-                    <label message-key="label.secretKey"></label>
-                    <input type="password" ng-model="awsCognito.secretKey" name="secretKey" required/>
-                    <div ng-messages="awsCognitoForm.secretKey.$error" role="alert">
-                        <div ng-message="required" message-key="error.secretKey.required"></div>
-                    </div>
-                </md-input-container>
-
-                <div flex></div>
-
-                <md-input-container flex>
-                    <label message-key="label.loginUrl"></label>
-                    <input type="text" ng-model="awsCognito.loginUrl" name="loginUrl" required/>
-                    <div ng-messages="awsCognitoForm.loginUrl.$error" role="alert">
-                        <div ng-message="required" message-key="error.loginUrl.required"></div>
-                    </div>
-                </md-input-container>
-
-                <div flex></div>
-
-                <md-input-container flex>
-                    <label message-key="label.providerKey"></label>
-                    <input type="text" ng-model="awsCognito.providerKey" name="providerKey" required/>
-                    <div ng-messages="awsCognitoForm.providerKey.$error" role="alert">
-                        <div ng-message="required" message-key="error.providerKey.required"></div>
-                    </div>
-                </md-input-container>
-
-                <div flex></div>
-
-                <md-input-container flex>
-                    <label message-key="label.siteKey"></label>
-                    <input type="text" ng-model="awsCognito.siteKey" name="siteKey" required/>
-                    <div ng-messages="awsCognitoForm.siteKey.$error" role="alert">
-                        <div ng-message="required" message-key="error.siteKey.required"></div>
-                    </div>
-                </md-input-container>
-            </div>
-            <div layout="row" ng-show="awsCognito.withCustomLogin">
-                <md-input-container flex>
-                    <label message-key="label.accessKeyId"></label>
-                    <input type="text" ng-model="awsCognito.accessKeyId" name="accessKeyId" required/>
-                    <div ng-messages="awsCognitoForm.accessKeyId.$error" role="alert">
-                        <div ng-message="required" message-key="error.accessKeyId.required"></div>
-                    </div>
-                </md-input-container>
-
-                <div flex></div>
-
-                <md-input-container flex>
-                    <label message-key="label.secretAccessKey"></label>
-                    <input type="password" ng-model="awsCognito.secretAccessKey" name="secretAccessKey"
-                           required/>
-                    <div ng-messages="awsCognitoForm.secretAccessKey.$error" role="alert">
-                        <div ng-message="required" message-key="error.secretAccessKey.required"></div>
-                    </div>
-                </md-input-container>
-
-                <div flex></div>
-
-                <md-input-container flex>
-                    <label message-key="label.userPoolId"></label>
-                    <input type="text" ng-model="awsCognito.userPoolId" name="userPoolId" required/>
-                    <div ng-messages="awsCognitoForm.userPoolId.$error" role="alert">
-                        <div ng-message="required" message-key="error.userPoolId.required"></div>
-                    </div>
-                </md-input-container>
-            </div>
-            <div layout="row" ng-show="!awsCognito.withCustomLogin">
-                <md-input-container flex>
-                    <label message-key="label.endpoint"></label>
-                    <input type="text" ng-model="awsCognito.endpoint" name="endpoint"/>
-                    <div ng-messages="awsCognitoForm.endpoint.$error" role="alert">
-                        <div ng-message="required" message-key="error.endpoint.required"></div>
-                    </div>
-                </md-input-container>
-
-                <div flex></div>
-
-                <md-input-container flex>
-                    <label message-key="label.region"></label>
-                    <input type="text" ng-model="awsCognito.region" name="region"/>
-                    <div ng-messages="awsCognitoForm.region.$error" role="alert">
-                        <div ng-message="required" message-key="error.region.required"></div>
-                    </div>
-                </md-input-container>
-            </div>
-            <div layout="row" ng-show="!awsCognito.withCustomLogin">
+            <div layout="row">
                 <md-input-container flex>
                     <label message-key="label.apiKey"></label>
                     <input type="text" ng-model="awsCognito.apiKey" name="apiKey"/>
@@ -148,7 +54,7 @@
                     </div>
                 </md-input-container>
 
-                <div flex></div>
+                <div flex="5"></div>
 
                 <md-input-container flex>
                     <label message-key="label.apiSecret"></label>
@@ -158,12 +64,37 @@
                     </div>
                 </md-input-container>
             </div>
+            <div layout="row">
+                <md-input-container flex>
+                    <label message-key="label.endpoint"></label>
+                    <input type="text" ng-model="awsCognito.endpoint" name="endpoint"/>
+                    <div ng-messages="awsCognitoForm.endpoint.$error" role="alert">
+                        <div ng-message="required" message-key="error.endpoint.required"></div>
+                    </div>
+                </md-input-container>
+
+                <div flex="5"></div>
+
+                <md-input-container flex>
+                    <label message-key="label.scope"></label>
+                    <input type="text" ng-model="awsCognito.scope" name="scope"/>
+                    <div ng-messages="awsCognitoForm.scope.$error" role="alert">
+                        <div ng-message="required" message-key="error.scope.required"></div>
+                    </div>
+                </md-input-container>
+            </div>
+            <div layout="row">
+                <md-input-container flex>
+                    <label message-key="label.callbackUrl"></label>
+                    <input type="text" ng-model="awsCognito.callbackUrl" name="callbackUrl"/>
+                    <div ng-messages="awsCognitoForm.callbackUrl.$error" role="alert">
+                        <div ng-message="required" message-key="error.callbackUrl.required"></div>
+                    </div>
+                </md-input-container>
+            </div>
         </form>
 
         <md-card-actions layout="row" layout-align="end center">
-            <md-button class="md-accent" message-key="label.mappers"
-                       ng-click="awsCognito.goToMappers()" ng-show="awsCognito.connectorHasSettings">
-            </md-button>
             <md-button class="md-accent" message-key="label.save" ng-click="awsCognito.saveSettings()"></md-button>
         </md-card-actions>
     </md-card-content>

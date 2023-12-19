@@ -1,9 +1,10 @@
 package org.jahia.community.aws.cognito.client;
 
-import com.auth0.jwt.JWT;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
+import org.jahia.community.aws.cognito.connector.AwsCognitoConfiguration;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,9 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.ListUsersRe
 import software.amazon.awssdk.services.cognitoidentityprovider.model.ListUsersResponse;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserType;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -275,7 +278,16 @@ public class AwsCognitoClientService {
             if (logger.isDebugEnabled()) {
                 logger.debug(response.toString());
             }
-            return Optional.ofNullable(response.authenticationResult()).map(result -> JWT.decode(result.idToken()).getSubject());
+            return Optional.ofNullable(response.authenticationResult()).map(result -> {
+                String[] chunks = result.idToken().split("\\.");
+                try {
+                    JSONObject payload = new JSONObject(new String(Base64.getDecoder().decode(chunks[1].getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+                    return payload.getString("sub");
+                } catch (JSONException e) {
+                    logger.error("", e);
+                    return null;
+                }
+            });
         } catch (Exception e) {
             logger.warn("Unable to log in user: {}", username);
             if (logger.isDebugEnabled()) {

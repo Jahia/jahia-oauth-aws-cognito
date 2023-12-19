@@ -1,6 +1,5 @@
 package org.jahia.community.aws.cognito.connector;
 
-import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
 import org.jahia.modules.jahiaauth.service.ConnectorPropertyInfo;
 import org.jahia.modules.jahiaauth.service.ConnectorService;
@@ -31,7 +30,7 @@ public class AwsCognitoConnector implements OAuthConnectorService {
     @Activate
     private void onActivate() {
         logger.info("Register AwsCognitoConnector");
-        jahiaOAuthService.addOAuthDefaultApi20(AwsCognitoConstants.CONNECTOR_KEY, connectorConfig -> AwsCognitoApi20.instance(connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT), connectorConfig.getProperty(AwsCognitoConstants.REGION)));
+        jahiaOAuthService.addOAuthDefaultApi20(AwsCognitoConstants.CONNECTOR_KEY, connectorConfig -> AwsCognitoApi20.instance(connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT)));
     }
 
     @Deactivate
@@ -41,8 +40,8 @@ public class AwsCognitoConnector implements OAuthConnectorService {
     }
 
     @Override
-    public String getProtectedResourceUrl(ConnectorConfig config) {
-        return String.format(AwsCognitoConstants.URL, config.getProperty(AwsCognitoConstants.ENDPOINT), config.getProperty(AwsCognitoConstants.REGION)) + "/userinfo";
+    public String getProtectedResourceUrl(ConnectorConfig connectorConfig) {
+        return connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT) + "/oauth2/userInfo";
     }
 
     @Override

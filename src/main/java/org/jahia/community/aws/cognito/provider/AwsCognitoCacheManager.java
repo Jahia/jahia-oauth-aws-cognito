@@ -5,7 +5,7 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
-import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
+import org.jahia.community.aws.cognito.connector.AwsCognitoConstants;
 import org.jahia.community.aws.cognito.client.AwsCognitoGroup;
 import org.jahia.community.aws.cognito.client.AwsCognitoUser;
 import org.jahia.services.cache.CacheHelper;

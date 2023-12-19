@@ -21,15 +21,10 @@ This module is a community module to show how to implement an authentication bas
   - `accessKeyId`: AWS access key ID
   - `secretAccessKey`: AWS secret access key
   - `userPoolId`: AWS user pool ID
-- Go to Site settings: set up the fields and toggle the slide `Activate` otherwise the login url provider will not work (only Jahia Actions still work)
+- Go to Site settings: set up the fields and toggle the slide `Activate` otherwise the autentication url will not work
   - OpenID Connect implementation:
-    - `endpoint`: AWS endpoint
-    - `region`: AWS region
     - `clientId`: AWS client ID
     - `clientSecret`: AWS client secret
-  - External login URL: toggle the slider `With custom login`
-    - `secretKey`: Custom secretKey to identifity the user
-    - `loginUrl`: Custom login URL
-    - `accessKeyId`: Admin access key ID
-    - `secretAccessKey`: Admin secret access key
-    - `userPoolId`: Admin user pool ID
+    - `endpoint`: AWS endpoint
+    - `scope`: AWS scope (openid profile email)
+    - `callbackUrl`: AWS callback URL

@@ -4,7 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.api.settings.SettingsBean;
-import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
+import org.jahia.community.aws.cognito.connector.AwsCognitoConstants;
 import org.jahia.exceptions.JahiaRuntimeException;
 import org.jahia.modules.external.users.UserGroupProviderConfiguration;
 import org.jahia.modules.jahiaoauth.service.JahiaOAuthConstants;
@@ -89,15 +89,6 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
         if (parameters.containsKey("propValue." + AwsCognitoConstants.TARGET_SITE) && StringUtils.isNotBlank((String) parameters.get("propValue." + AwsCognitoConstants.TARGET_SITE))) {
             properties.put(AwsCognitoConstants.TARGET_SITE, parameters.get("propValue." + AwsCognitoConstants.TARGET_SITE));
         }
-        if (parameters.containsKey("propValue." + AwsCognitoConstants.ENDPOINT)) {
-            properties.put(AwsCognitoConstants.ENDPOINT, parameters.get("propValue." + AwsCognitoConstants.ENDPOINT));
-        }
-        if (parameters.containsKey("propValue." + JahiaOAuthConstants.PROPERTY_API_KEY)) {
-            properties.put(JahiaOAuthConstants.PROPERTY_API_KEY, parameters.get("propValue." + JahiaOAuthConstants.PROPERTY_API_KEY));
-        }
-        if (parameters.containsKey("propValue." + JahiaOAuthConstants.PROPERTY_API_SECRET)) {
-            properties.put(JahiaOAuthConstants.PROPERTY_API_SECRET, parameters.get("propValue." + JahiaOAuthConstants.PROPERTY_API_SECRET));
-        }
         if (parameters.containsKey("propValue." + AwsCognitoConstants.ACCESS_KEY_ID)) {
             properties.put(AwsCognitoConstants.ACCESS_KEY_ID, parameters.get("propValue." + AwsCognitoConstants.ACCESS_KEY_ID));
         }
@@ -106,6 +97,9 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
         }
         if (parameters.containsKey("propValue." + AwsCognitoConstants.USER_POOL_ID)) {
             properties.put(AwsCognitoConstants.USER_POOL_ID, parameters.get("propValue." + AwsCognitoConstants.USER_POOL_ID));
+        }
+        if (parameters.containsKey("propValue." + JahiaOAuthConstants.PROPERTY_API_KEY)) {
+            properties.put(JahiaOAuthConstants.PROPERTY_API_KEY, parameters.get("propValue." + JahiaOAuthConstants.PROPERTY_API_KEY));
         }
         return properties;
     }

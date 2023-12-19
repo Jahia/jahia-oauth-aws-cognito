@@ -10,16 +10,10 @@
         const CONNECTOR_SERVICE_NAME = 'AwsCognitoApi20';
 
         const vm = this;
-        vm.expandedCard = false;
-        vm.callbackUrl = '';
 
         vm.saveSettings = () => {
             // Value can't be empty
-            if (!vm.withCustomLogin && (!vm.apiKey || !vm.apiSecret || !vm.endpoint || !vm.region)) {
-                helperService.errorToast(i18nService.message('label.missingMandatoryProperties'));
-                return false;
-            }
-            if (vm.withCustomLogin && (!vm.secretKey || !vm.loginUrl || !vm.accessKeyId || !vm.secretAccessKey || !vm.userPoolId || !vm.providerKey || !vm.siteKey)) {
+            if (!vm.apiKey || !vm.apiSecret || !vm.endpoint || !vm.scope || !vm.callbackUrl) {
                 helperService.errorToast(i18nService.message('label.missingMandatoryProperties'));
                 return false;
             }
@@ -29,18 +23,11 @@
                 connectorServiceName: CONNECTOR_SERVICE_NAME,
                 properties: {
                     enabled: vm.enabled,
-                    apiKey: vm.apiKey || 'AWS_COGNITO_API_KEY',
-                    apiSecret: vm.apiSecret || 'AWS_COGNITO_API_SECRET',
+                    apiKey: vm.apiKey,
+                    apiSecret: vm.apiSecret,
                     endpoint: vm.endpoint,
-                    region: vm.region,
-                    withCustomLogin: vm.withCustomLogin,
-                    secretKey: vm.secretKey,
-                    loginUrl: vm.loginUrl,
-                    accessKeyId: vm.accessKeyId,
-                    secretAccessKey: vm.secretAccessKey,
-                    userPoolId: vm.userPoolId,
-                    providerKey: vm.providerKey,
-                    siteKey: vm.siteKey
+                    scope: vm.scope,
+                    callbackUrl: vm.callbackUrl
                 }
             }).success(() => {
                 vm.connectorHasSettings = true;
@@ -49,15 +36,12 @@
                 helperService.errorToast(`${i18nService.message('jcauthnt_awsCognitoOAuthView')}: ${data.error}`);
             });
         };
-        vm.goToMappers = () => {
-            // the second part of the path must be the service name
-            $location.path(`/mappers/${CONNECTOR_SERVICE_NAME}`);
-        };
+
         vm.toggleCard = () => {
             vm.expandedCard = !vm.expandedCard;
         };
 
-        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'region', 'withCustomLogin', 'secretKey', 'loginUrl', 'accessKeyId', 'secretAccessKey', 'userPoolId', 'providerKey', 'siteKey']).success(data => {
+        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'scope', 'callbackUrl']).success(data => {
             if (data && !angular.equals(data, {})) {
                 vm.connectorHasSettings = true;
                 vm.expandedCard = true;
@@ -65,15 +49,8 @@
                 vm.apiKey = data.apiKey;
                 vm.apiSecret = data.apiSecret;
                 vm.endpoint = data.endpoint;
-                vm.region = data.region;
-                vm.withCustomLogin = data.withCustomLogin === 'true';
-                vm.secretKey = data.secretKey;
-                vm.loginUrl = data.loginUrl;
-                vm.accessKeyId = data.accessKeyId;
-                vm.secretAccessKey = data.secretAccessKey;
-                vm.userPoolId = data.userPoolId;
-                vm.providerKey = data.providerKey;
-                vm.siteKey = data.siteKey;
+                vm.scope = data.scope;
+                vm.callbackUrl = data.callbackUrl;
             } else {
                 vm.connectorHasSettings = false;
                 vm.enabled = false;
