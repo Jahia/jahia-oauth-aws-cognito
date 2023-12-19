@@ -2,7 +2,7 @@ package org.jahia.community.aws.cognito.provider;
 
 import org.apache.commons.lang.StringUtils;
 import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
-import org.jahia.community.aws.cognito.connector.AwsCognitoConfiguration;
+import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.jahia.modules.external.users.ExternalUserGroupService;
 import org.jahia.modules.jahiaoauth.service.JahiaOAuthConstants;
 import org.osgi.framework.BundleContext;

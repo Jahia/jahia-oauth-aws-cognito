@@ -2,7 +2,7 @@ package org.jahia.community.aws.cognito.client;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jahia.community.aws.cognito.connector.AwsCognitoConfiguration;
+import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;

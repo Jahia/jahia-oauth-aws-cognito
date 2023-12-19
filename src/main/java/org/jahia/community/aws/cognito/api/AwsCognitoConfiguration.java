@@ -1,4 +1,4 @@
-package org.jahia.community.aws.cognito.connector;
+package org.jahia.community.aws.cognito.api;
 
 import org.apache.commons.lang.StringUtils;
 
