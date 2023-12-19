@@ -54,7 +54,7 @@
     <groupId>org.jahia.community</groupId>
     <artifactId>jahia-oauth-aws-cognito</artifactId>
     <name>jahia-oauth-aws-cognito</name>
-    <version>2.2.2-SNAPSHOT</version>
+    <version>2.2.3-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <description>This is the custom module (jahia-oauth-aws-cognito) for running on a Jahia server.</description>
     <scm>
