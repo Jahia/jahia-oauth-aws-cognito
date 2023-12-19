@@ -46,7 +46,7 @@ public class AwsCognitoConnector implements OAuthConnectorService {
 
     @Override
     public List<ConnectorPropertyInfo> getAvailableProperties() {
-        return Collections.emptyList();
+        return Collections.singletonList(new ConnectorPropertyInfo(AwsCognitoConstants.SSO_LOGIN, "string"));
     }
 
     @Override

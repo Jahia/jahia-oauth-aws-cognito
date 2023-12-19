@@ -2,14 +2,17 @@ package org.jahia.community.aws.cognito.actions;
 
 import org.apache.commons.lang.StringUtils;
 import org.jahia.api.content.JCRTemplate;
+import org.jahia.api.usermanager.JahiaUserManagerService;
 import org.jahia.bin.Action;
 import org.jahia.bin.ActionResult;
 import org.jahia.bin.Render;
 import org.jahia.community.aws.cognito.connector.AwsCognitoConstants;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
+import org.jahia.modules.jahiaauth.service.JahiaAuthConstants;
 import org.jahia.modules.jahiaauth.service.SettingsService;
 import org.jahia.modules.jahiaoauth.service.JahiaOAuthService;
 import org.jahia.services.content.JCRSessionWrapper;
+import org.jahia.services.content.decorator.JCRUserNode;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.Resource;
 import org.jahia.services.render.URLResolver;
@@ -34,6 +37,7 @@ public class AwsCognitoCallbackAction extends Action {
     private SettingsService settingsService;
     private JCRTemplate jcrTemplate;
     private JahiaSitesService jahiaSitesService;
+    private JahiaUserManagerService jahiaUserManagerService;
 
     @Reference
     private void setJahiaOAuthService(JahiaOAuthService jahiaOAuthService) {
@@ -53,6 +57,11 @@ public class AwsCognitoCallbackAction extends Action {
     @Reference
     private void setJahiaSitesService(JahiaSitesService jahiaSitesService) {
         this.jahiaSitesService = jahiaSitesService;
+    }
+
+    @Reference
+    private void setJahiaUserManagerService(JahiaUserManagerService jahiaUserManagerService) {
+        this.jahiaUserManagerService = jahiaUserManagerService;
     }
 
     public AwsCognitoCallbackAction() {
@@ -78,6 +87,11 @@ public class AwsCognitoCallbackAction extends Action {
                 if (StringUtils.isBlank(returnUrl)) {
                     returnUrl = jcrTemplate.doExecuteWithSystemSessionAsUser(null, renderContext.getWorkspace(), renderContext.getMainResourceLocale(), systemSession ->
                             jahiaSitesService.getSiteByKey(siteKey, systemSession).getHome().getUrl());
+                }
+
+                if (logger.isDebugEnabled()) {
+                    JCRUserNode jcrUserNode = jahiaUserManagerService.lookupUser((String) httpServletRequest.getAttribute(JahiaAuthConstants.SSO_LOGIN));
+                    logger.debug("User found: {}", jcrUserNode == null ? null : jcrUserNode.getPath());
                 }
                 // WARN: site query param is mandatory for the SSOValve in jahia-authentication module
                 return new ActionResult(HttpServletResponse.SC_OK, returnUrl + "?site=" + siteKey, true, null);
