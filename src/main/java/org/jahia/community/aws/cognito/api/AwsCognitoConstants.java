@@ -13,6 +13,7 @@ public final class AwsCognitoConstants {
         // No constructor
     }
 
+    public static final String PROVIDER_KEY = "awsCognito";
     public static final String CONNECTOR_KEY = "AwsCognitoApi20";
     public static final String SESSION_OAUTH_AWS_COGNITO_RETURN_URL = "oauth.aws-cognito.return-url";
     public static final String CUSTOM_PROPERTY_EMAIL = "email";

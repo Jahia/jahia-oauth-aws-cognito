@@ -29,8 +29,7 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
     private static final Logger logger = LoggerFactory.getLogger(AwsCognitoUserGroupProviderConfiguration.class);
     private static final long serialVersionUID = 574584048983934991L;
 
-    protected static final String PROVIDER_KEY = "awsCognito";
-    protected static final String PROVIDER_KEY_PROP = PROVIDER_KEY + ".provider.key";
+    protected static final String PROVIDER_KEY_PROP = AwsCognitoConstants.PROVIDER_KEY + ".provider.key";
 
     private AwsCognitoKarafConfigurationFactory awsCognitoKarafConfigurationFactory;
     private ConfigurationAdmin configurationAdmin;
@@ -68,7 +67,7 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
 
     @Override
     public String getName() {
-        return PROVIDER_KEY;
+        return AwsCognitoConstants.PROVIDER_KEY;
     }
 
     @Override
@@ -104,26 +103,26 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
     @Override
     public String create(Map<String, Object> parameters, Map<String, Object> flashScope) throws Exception {
         Properties properties = getProperties(parameters);
-        flashScope.put(PROVIDER_KEY + "Properties", properties);
+        flashScope.put(AwsCognitoConstants.PROVIDER_KEY + "Properties", properties);
 
         // config name
         String configName = (String) parameters.get("configName");
         if (StringUtils.isBlank(configName)) {
             // if we didn't provide a not-blank config name, generate one
-            configName = PROVIDER_KEY + System.currentTimeMillis();
+            configName = AwsCognitoConstants.PROVIDER_KEY + System.currentTimeMillis();
         }
         // normalize the name
         configName = JCRContentUtils.generateNodeName(configName);
         flashScope.put("configName", configName);
 
         // provider key
-        String providerKey = PROVIDER_KEY + "." + configName;
+        String providerKey = AwsCognitoConstants.PROVIDER_KEY + "." + configName;
         configName = awsCognitoKarafConfigurationFactory.getName() + "-" + configName + ".cfg";
 
         // check that we don't already have a provider with that key
         String pid = awsCognitoKarafConfigurationFactory.getConfigPID(providerKey);
         if (pid != null) {
-            throw new Exception("An " + PROVIDER_KEY + " provider with key '" + providerKey + "' already exists");
+            throw new Exception("An " + AwsCognitoConstants.PROVIDER_KEY + " provider with key '" + providerKey + "' already exists");
         }
 
 
@@ -155,10 +154,10 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
 
     private File getConfigFile(String providerKey) {
         String configName;
-        if (PROVIDER_KEY.equals(providerKey)) {
+        if (AwsCognitoConstants.PROVIDER_KEY.equals(providerKey)) {
             configName = awsCognitoKarafConfigurationFactory.getName() + "-config.cfg";
-        } else if (providerKey.startsWith(PROVIDER_KEY + ".")) {
-            configName = awsCognitoKarafConfigurationFactory.getName() + "-" + providerKey.substring((PROVIDER_KEY + ".").length()) + ".cfg";
+        } else if (providerKey.startsWith(AwsCognitoConstants.PROVIDER_KEY + ".")) {
+            configName = awsCognitoKarafConfigurationFactory.getName() + "-" + providerKey.substring((AwsCognitoConstants.PROVIDER_KEY + ".").length()) + ".cfg";
         } else {
             throw new JahiaRuntimeException("Wrong provider key: " + providerKey);
         }
@@ -172,7 +171,7 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
     @Override
     public void edit(String providerKey, Map<String, Object> parameters, Map<String, Object> flashScope) throws Exception {
         Properties properties = getProperties(parameters);
-        flashScope.put(PROVIDER_KEY + "Properties", properties);
+        flashScope.put(AwsCognitoConstants.PROVIDER_KEY + "Properties", properties);
 
         File file = getConfigFile(providerKey);
         if (file.exists()) {
@@ -185,7 +184,7 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
         } else {
             String pid = awsCognitoKarafConfigurationFactory.getConfigPID(providerKey);
             if (pid == null) {
-                throw new Exception("Cannot find " + PROVIDER_KEY + " provider " + providerKey);
+                throw new Exception("Cannot find " + AwsCognitoConstants.PROVIDER_KEY + " provider " + providerKey);
             }
             Configuration configuration = configurationAdmin.getConfiguration(pid);
             properties.put(PROVIDER_KEY_PROP, providerKey);
