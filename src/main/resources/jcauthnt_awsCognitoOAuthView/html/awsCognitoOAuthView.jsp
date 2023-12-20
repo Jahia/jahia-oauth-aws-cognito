@@ -92,6 +92,18 @@
                     </div>
                 </md-input-container>
             </div>
+            <div layout="row">
+                <md-input-container flex>
+                    <label message-key="label.logoutEndpoint"></label>
+                    <input type="text" ng-model="awsCognito.logoutEndpoint" name="logoutEndpoint"/>
+                </md-input-container>
+            </div>
+            <div layout="row">
+                <md-input-container flex>
+                    <label message-key="label.logoutCallbackUrl"></label>
+                    <input type="text" ng-model="awsCognito.logoutCallbackUrl" name="logoutCallbackUrl"/>
+                </md-input-container>
+            </div>
         </form>
 
         <md-card-actions layout="row" layout-align="end center">

@@ -118,28 +118,6 @@
                                value="${awsCognitoProperties['userPoolId']}"/>
                     </div>
                 </div>
-                <div class="form-group">
-                    <div class="col-md-4">
-                        <label class="control-label">
-                            <fmt:message bundle="${bundle}" key="AwsCognitoConfiguration.apiKey"/>
-                        </label>
-                    </div>
-                    <div class="col-md-8">
-                        <input type="text" name="propValue.apiKey" class="form-control"
-                               value="${awsCognitoProperties['apiKey']}"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-4">
-                        <label class="control-label">
-                            <fmt:message bundle="${bundle}" key="AwsCognitoConfiguration.apiSecret"/>
-                        </label>
-                    </div>
-                    <div class="col-md-8">
-                        <input type="password" name="propValue.apiSecret" class="form-control"
-                               value="${awsCognitoProperties['apiSecret']}"/>
-                    </div>
-                </div>
             </div>
         </fieldset>
     </div>

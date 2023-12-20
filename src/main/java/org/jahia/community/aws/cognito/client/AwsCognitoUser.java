@@ -14,7 +14,6 @@ public class AwsCognitoUser implements Serializable {
     private static final long serialVersionUID = -200885001913981199L;
 
     private final String username;
-    private String email;
     private JahiaUserImpl jahiaUser;
     private List<String> groups;
     private final Properties attributes;
@@ -24,17 +23,12 @@ public class AwsCognitoUser implements Serializable {
         attributes = new Properties();
         attributes.putAll(awsUser.attributes().stream().collect(Collectors.toMap(AttributeType::name, AttributeType::value)));
         if (attributes.containsKey(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL)) {
-            email = (String) attributes.get(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL);
-            attributes.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, email);
+            attributes.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, attributes.get(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL));
         }
     }
 
     public String getUsername() {
         return username;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     public Properties getAttributes() {

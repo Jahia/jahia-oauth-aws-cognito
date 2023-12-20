@@ -5,7 +5,6 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
-import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.community.aws.cognito.client.AwsCognitoGroup;
 import org.jahia.community.aws.cognito.client.AwsCognitoUser;
 import org.jahia.services.cache.CacheHelper;
@@ -141,7 +140,7 @@ public class AwsCognitoCacheManager {
     }
 
     private static String getCacheNameKey(String providerKey, String siteKey, String objectName) {
-        return providerKey + "_" + siteKey + "_" + AwsCognitoConstants.PROVIDER_KEY + "_" + objectName;
+        return providerKey + "_" + siteKey + "_" + AwsCognitoUserGroupProviderConfiguration.PROVIDER_KEY + "_" + objectName;
     }
 
     public void flushCaches() {

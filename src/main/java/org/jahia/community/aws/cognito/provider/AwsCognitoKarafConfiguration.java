@@ -2,21 +2,15 @@ package org.jahia.community.aws.cognito.provider;
 
 import org.apache.commons.lang.StringUtils;
 import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
-import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.community.aws.cognito.client.AwsCognitoClientService;
 import org.jahia.modules.external.users.ExternalUserGroupService;
-import org.jahia.modules.jahiaoauth.service.JahiaOAuthConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
 
 public class AwsCognitoKarafConfiguration {
-    private static final Logger logger = LoggerFactory.getLogger(AwsCognitoKarafConfiguration.class);
-
     private final String providerKey;
     private AwsCognitoUserGroupProvider awsCognitoUserGroupProvider;
 
@@ -40,7 +34,7 @@ public class AwsCognitoKarafConfiguration {
         } else {
             confId = StringUtils.removeEnd(StringUtils.substringAfter(filename, factoryPid + "-"), ".cfg");
         }
-        return (StringUtils.isBlank(confId) || "config".equals(confId)) ? AwsCognitoConstants.PROVIDER_KEY : (AwsCognitoConstants.PROVIDER_KEY + "." + confId);
+        return (StringUtils.isBlank(confId) || "config".equals(confId)) ? AwsCognitoUserGroupProviderConfiguration.PROVIDER_KEY : (AwsCognitoUserGroupProviderConfiguration.PROVIDER_KEY + "." + confId);
     }
 
     public String getProviderKey() {
@@ -56,16 +50,8 @@ public class AwsCognitoKarafConfiguration {
             // Deactivate the provider before reconfiguring it.
             awsCognitoUserGroupProvider.unregister();
         }
-
         awsCognitoUserGroupProvider.setKey(providerKey);
-
-        awsCognitoUserGroupProvider.setAwsCognitoConfiguration(new AwsCognitoConfiguration(
-                (String) dictionary.get(AwsCognitoConstants.TARGET_SITE),
-                (String) dictionary.get(AwsCognitoConstants.ACCESS_KEY_ID),
-                (String) dictionary.get(AwsCognitoConstants.SECRET_ACCESS_KEY),
-                (String) dictionary.get(AwsCognitoConstants.USER_POOL_ID),
-                (String) dictionary.get(JahiaOAuthConstants.PROPERTY_API_KEY),
-                (String) dictionary.get(JahiaOAuthConstants.PROPERTY_API_SECRET)));
+        awsCognitoUserGroupProvider.setAwsCognitoConfiguration(new AwsCognitoConfiguration(dictionary));
         // Activate (again)
         awsCognitoUserGroupProvider.register();
     }

@@ -7,7 +7,6 @@ import org.jahia.api.settings.SettingsBean;
 import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.exceptions.JahiaRuntimeException;
 import org.jahia.modules.external.users.UserGroupProviderConfiguration;
-import org.jahia.modules.jahiaoauth.service.JahiaOAuthConstants;
 import org.jahia.osgi.BundleUtils;
 import org.jahia.services.content.JCRContentUtils;
 import org.osgi.framework.BundleContext;
@@ -30,7 +29,8 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
     private static final Logger logger = LoggerFactory.getLogger(AwsCognitoUserGroupProviderConfiguration.class);
     private static final long serialVersionUID = 574584048983934991L;
 
-    protected static final String PROVIDER_KEY_PROP = AwsCognitoConstants.PROVIDER_KEY + ".provider.key";
+    protected static final String PROVIDER_KEY = "awsCognito";
+    protected static final String PROVIDER_KEY_PROP = PROVIDER_KEY + ".provider.key";
 
     private AwsCognitoKarafConfigurationFactory awsCognitoKarafConfigurationFactory;
     private ConfigurationAdmin configurationAdmin;
@@ -68,7 +68,7 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
 
     @Override
     public String getName() {
-        return AwsCognitoConstants.PROVIDER_KEY;
+        return PROVIDER_KEY;
     }
 
     @Override
@@ -98,38 +98,32 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
         if (parameters.containsKey("propValue." + AwsCognitoConstants.USER_POOL_ID)) {
             properties.put(AwsCognitoConstants.USER_POOL_ID, parameters.get("propValue." + AwsCognitoConstants.USER_POOL_ID));
         }
-        if (parameters.containsKey("propValue." + JahiaOAuthConstants.PROPERTY_API_KEY)) {
-            properties.put(JahiaOAuthConstants.PROPERTY_API_KEY, parameters.get("propValue." + JahiaOAuthConstants.PROPERTY_API_KEY));
-        }
-        if (parameters.containsKey("propValue." + JahiaOAuthConstants.PROPERTY_API_SECRET)) {
-            properties.put(JahiaOAuthConstants.PROPERTY_API_SECRET, parameters.get("propValue." + JahiaOAuthConstants.PROPERTY_API_SECRET));
-        }
         return properties;
     }
 
     @Override
     public String create(Map<String, Object> parameters, Map<String, Object> flashScope) throws Exception {
         Properties properties = getProperties(parameters);
-        flashScope.put(AwsCognitoConstants.PROVIDER_KEY + "Properties", properties);
+        flashScope.put(PROVIDER_KEY + "Properties", properties);
 
         // config name
         String configName = (String) parameters.get("configName");
         if (StringUtils.isBlank(configName)) {
             // if we didn't provide a not-blank config name, generate one
-            configName = AwsCognitoConstants.PROVIDER_KEY + System.currentTimeMillis();
+            configName = PROVIDER_KEY + System.currentTimeMillis();
         }
         // normalize the name
         configName = JCRContentUtils.generateNodeName(configName);
         flashScope.put("configName", configName);
 
         // provider key
-        String providerKey = AwsCognitoConstants.PROVIDER_KEY + "." + configName;
+        String providerKey = PROVIDER_KEY + "." + configName;
         configName = awsCognitoKarafConfigurationFactory.getName() + "-" + configName + ".cfg";
 
         // check that we don't already have a provider with that key
         String pid = awsCognitoKarafConfigurationFactory.getConfigPID(providerKey);
         if (pid != null) {
-            throw new Exception("An " + AwsCognitoConstants.PROVIDER_KEY + " provider with key '" + providerKey + "' already exists");
+            throw new Exception("An " + PROVIDER_KEY + " provider with key '" + providerKey + "' already exists");
         }
 
 
@@ -161,10 +155,10 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
 
     private File getConfigFile(String providerKey) {
         String configName;
-        if (AwsCognitoConstants.PROVIDER_KEY.equals(providerKey)) {
+        if (PROVIDER_KEY.equals(providerKey)) {
             configName = awsCognitoKarafConfigurationFactory.getName() + "-config.cfg";
-        } else if (providerKey.startsWith(AwsCognitoConstants.PROVIDER_KEY + ".")) {
-            configName = awsCognitoKarafConfigurationFactory.getName() + "-" + providerKey.substring((AwsCognitoConstants.PROVIDER_KEY + ".").length()) + ".cfg";
+        } else if (providerKey.startsWith(PROVIDER_KEY + ".")) {
+            configName = awsCognitoKarafConfigurationFactory.getName() + "-" + providerKey.substring((PROVIDER_KEY + ".").length()) + ".cfg";
         } else {
             throw new JahiaRuntimeException("Wrong provider key: " + providerKey);
         }
@@ -178,7 +172,7 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
     @Override
     public void edit(String providerKey, Map<String, Object> parameters, Map<String, Object> flashScope) throws Exception {
         Properties properties = getProperties(parameters);
-        flashScope.put(AwsCognitoConstants.PROVIDER_KEY + "Properties", properties);
+        flashScope.put(PROVIDER_KEY + "Properties", properties);
 
         File file = getConfigFile(providerKey);
         if (file.exists()) {
@@ -191,7 +185,7 @@ public class AwsCognitoUserGroupProviderConfiguration implements UserGroupProvid
         } else {
             String pid = awsCognitoKarafConfigurationFactory.getConfigPID(providerKey);
             if (pid == null) {
-                throw new Exception("Cannot find " + AwsCognitoConstants.PROVIDER_KEY + " provider " + providerKey);
+                throw new Exception("Cannot find " + PROVIDER_KEY + " provider " + providerKey);
             }
             Configuration configuration = configurationAdmin.getConfiguration(pid);
             properties.put(PROVIDER_KEY_PROP, providerKey);

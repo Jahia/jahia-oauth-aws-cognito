@@ -236,9 +236,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
 
     @Override
     public boolean verifyPassword(String userName, String userPassword) {
-        return awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userName)
-                .filter(awsCognitoUser -> awsCognitoClientService.login(awsCognitoConfiguration, awsCognitoUser.getEmail(), userPassword)
-                        .isPresent()).isPresent();
+        throw new UnsupportedOperationException();
     }
 
     @Override

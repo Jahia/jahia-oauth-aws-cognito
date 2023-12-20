@@ -65,7 +65,6 @@ public class AwsCognitoCallbackAction extends Action {
     }
 
     public AwsCognitoCallbackAction() {
-        // TODO: to be executed on the site
         setName(NAME);
         setRequireAuthenticatedUser(false);
         setRequiredMethods(Render.METHOD_GET);
