@@ -60,7 +60,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
             throw new UserNotFoundException();
         }
         return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId,
-                        () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
+                        () -> awsCognitoClientService.getUser(awsCognitoConfiguration, AwsCognitoConstants.SSO_LOGIN, userId))
                 .orElseThrow(() -> new UserNotFoundException("User '" + userId + "' not found.")).getJahiaUser();
     }
 
@@ -130,7 +130,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         List<String> groups = new ArrayList<>();
         awsCognitoClientService.getMembership(awsCognitoConfiguration, userId).orElse(Collections.emptyList())
                 .forEach(group -> groups.add(group.getName()));
-        awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
+        awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, AwsCognitoConstants.SSO_LOGIN, userId))
                 .ifPresent(u -> u.setGroups(groups));
         return Collections.unmodifiableList(groups);
     }
@@ -148,7 +148,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         if (searchCriteria.containsKey(PROP_USERNAME) && searchCriteria.size() == 1 && !searchCriteria.getProperty(PROP_USERNAME).contains("*")) {
             String userId = searchCriteria.getProperty(PROP_USERNAME);
             return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId,
-                            () -> awsCognitoClientService.getUser(awsCognitoConfiguration, PROP_USERNAME, userId))
+                            () -> awsCognitoClientService.getUser(awsCognitoConfiguration, AwsCognitoConstants.SSO_LOGIN, userId))
                     .map(awsCognitoUser -> Collections.singletonList(awsCognitoUser.getUsername()))
                     .orElse(Collections.emptyList());
         }

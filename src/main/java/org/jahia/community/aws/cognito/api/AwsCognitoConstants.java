@@ -18,6 +18,7 @@ public final class AwsCognitoConstants {
     public static final String SESSION_OAUTH_AWS_COGNITO_RETURN_URL = "oauth.aws-cognito.return-url";
     public static final String CUSTOM_PROPERTY_EMAIL = "email";
     public static final String USER_PROPERTY_EMAIL = "j:email";
+    public static final String SSO_LOGIN = "sub";
 
     public static final String TARGET_SITE = "target.site";
     public static final String ACCESS_KEY_ID = "accessKeyId";

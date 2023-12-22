@@ -2,6 +2,8 @@ package org.jahia.community.aws.cognito.client;
 
 import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.services.usermanager.JahiaUserImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserType;
 
@@ -11,6 +13,8 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 public class AwsCognitoUser implements Serializable {
+    private static final Logger logger = LoggerFactory.getLogger(AwsCognitoUser.class);
+
     private static final long serialVersionUID = -200885001913981199L;
 
     private final String username;
@@ -19,9 +23,15 @@ public class AwsCognitoUser implements Serializable {
     private final Properties attributes;
 
     public AwsCognitoUser(UserType awsUser) {
-        username = awsUser.username();
         attributes = new Properties();
         attributes.putAll(awsUser.attributes().stream().collect(Collectors.toMap(AttributeType::name, AttributeType::value)));
+        if (!attributes.containsKey(AwsCognitoConstants.SSO_LOGIN)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("User not found: {}", attributes);
+            }
+            throw new RuntimeException("User not found");
+        }
+        username = (String) attributes.get(AwsCognitoConstants.SSO_LOGIN);
         if (attributes.containsKey(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL)) {
             attributes.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, attributes.get(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL));
         }
