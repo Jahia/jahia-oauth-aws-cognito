@@ -23,7 +23,7 @@ public final class AwsCognitoConstants {
     public static final String ACCESS_KEY_ID = "accessKeyId";
     public static final String SECRET_ACCESS_KEY = "secretAccessKey";
     public static final String USER_POOL_ID = "userPoolId";
-    public static final String LOGOUT_ENDPOINT = "logoutEndpoint";
+    public static final String ENDPOINT = "endpoint";
     public static final String LOGOUT_CALLBACK_URL = "logoutCallbackUrl";
     private static final String LOGOUT_URL = "%s/logout?client_id=%s&logout_uri=%s";
 
@@ -59,11 +59,11 @@ public final class AwsCognitoConstants {
                 return null;
             }
         }
-        if (!connectorConfig.getBooleanProperty(JahiaAuthConstants.PROPERTY_IS_ENABLED) || StringUtils.isBlank(connectorConfig.getProperty(LOGOUT_ENDPOINT))) {
+        if (!connectorConfig.getBooleanProperty(JahiaAuthConstants.PROPERTY_IS_ENABLED) || StringUtils.isBlank(connectorConfig.getProperty(ENDPOINT))) {
             return null;
         }
         return String.format(LOGOUT_URL,
-                connectorConfig.getProperty(LOGOUT_ENDPOINT),
+                connectorConfig.getProperty(ENDPOINT),
                 connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_KEY),
                 connectorConfig.getProperty(LOGOUT_CALLBACK_URL));
     }

@@ -21,8 +21,6 @@ import java.util.List;
 public class AwsCognitoConnector implements OAuthConnectorService {
     private static final Logger logger = LoggerFactory.getLogger(AwsCognitoConnector.class);
 
-    private static final String ENDPOINT = "endpoint";
-
     private JahiaOAuthService jahiaOAuthService;
 
     @Reference
@@ -33,7 +31,7 @@ public class AwsCognitoConnector implements OAuthConnectorService {
     @Activate
     private void onActivate() {
         logger.info("Register AwsCognitoConnector");
-        jahiaOAuthService.addOAuthDefaultApi20(AwsCognitoConstants.CONNECTOR_KEY, connectorConfig -> AwsCognitoApi20.instance(connectorConfig.getProperty(ENDPOINT)));
+        jahiaOAuthService.addOAuthDefaultApi20(AwsCognitoConstants.CONNECTOR_KEY, connectorConfig -> AwsCognitoApi20.instance(connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT)));
     }
 
     @Deactivate
@@ -44,7 +42,7 @@ public class AwsCognitoConnector implements OAuthConnectorService {
 
     @Override
     public String getProtectedResourceUrl(ConnectorConfig connectorConfig) {
-        return connectorConfig.getProperty(ENDPOINT) + "/oauth2/userinfo";
+        return connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT) + "/oauth2/userinfo";
     }
 
     @Override
