@@ -1,7 +1,6 @@
 package org.jahia.community.aws.cognito.client;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.jahia.community.aws.cognito.api.AwsCognitoConfiguration;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -165,12 +164,12 @@ public class AwsCognitoClientService {
         }
     }
 
-    public Optional<List<AwsCognitoGroup>> getGroups(AwsCognitoConfiguration awsCognitoConfiguration, String filter, int limit) {
+    private void getGroupsRecursively(AwsCognitoConfiguration awsCognitoConfiguration, List<GroupType> groups, String nextToken) {
         lock.lock();
-        List<GroupType> groups = new ArrayList<>();
-        ListGroupsRequest.Builder requestBuilder = ListGroupsRequest.builder()
-                .userPoolId(awsCognitoConfiguration.getUserPoolId())
-                .limit(limit);
+        ListGroupsRequest.Builder requestBuilder = ListGroupsRequest.builder().userPoolId(awsCognitoConfiguration.getUserPoolId());
+        if (nextToken != null) {
+            requestBuilder.nextToken(nextToken);
+        }
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListGroupsResponse response = cognitoIdentityProviderClient.listGroups(requestBuilder.build());
             if (logger.isDebugEnabled()) {
@@ -178,6 +177,10 @@ public class AwsCognitoClientService {
             }
             if (response.hasGroups() && !CollectionUtils.isEmpty(response.groups())) {
                 groups.addAll(response.groups());
+                nextToken = response.nextToken();
+                if (nextToken != null) {
+                    getGroupsRecursively(awsCognitoConfiguration, groups, nextToken);
+                }
             }
         } catch (Exception e) {
             logger.warn("Unable to get groups");
@@ -187,13 +190,15 @@ public class AwsCognitoClientService {
         } finally {
             lock.unlock();
         }
+    }
+
+    public Optional<List<AwsCognitoGroup>> getGroups(AwsCognitoConfiguration awsCognitoConfiguration) {
+        List<GroupType> groups = new ArrayList<>();
+        getGroupsRecursively(awsCognitoConfiguration, groups, null);
         if (groups.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(groups.stream()
-                .filter(group -> filter == null || StringUtils.containsIgnoreCase(group.groupName(), filter))
-                .map(AwsCognitoGroup::new)
-                .collect(Collectors.toList()));
+        return Optional.of(groups.stream().map(AwsCognitoGroup::new).collect(Collectors.toList()));
     }
 
     private void getMembershipRecursively(AwsCognitoConfiguration awsCognitoConfiguration, String username, List<GroupType> groups, String nextToken) {

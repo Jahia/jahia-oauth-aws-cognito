@@ -185,8 +185,32 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
                     .orElse(Collections.emptyList());
         }
 
-        logger.warn("Search groups is disabled");
-        return Collections.emptyList();
+        Optional<List<AwsCognitoGroup>> awsCognitoGroups = awsCognitoCacheManager.getGroups(getKey(), getSiteKey(), (int) offset, (int) limit, () ->
+                awsCognitoClientService.getGroups(awsCognitoConfiguration));
+
+        String filter;
+        if (searchCriteria.containsKey("*")) {
+            filter = searchCriteria.getProperty("*").replace("*", "");
+        } else if (searchCriteria.containsKey(PROP_GROUPNAME)) {
+            filter = searchCriteria.getProperty(PROP_GROUPNAME).replace("*", "");
+        } else {
+            filter = null;
+            logger.warn("Unable to search groups multiple attributes ; return all groups");
+        }
+
+        List<String> groupIds = new ArrayList<>();
+        List<AwsCognitoGroup> groups = awsCognitoGroups.orElse(Collections.emptyList())
+                .stream()
+                .filter(group -> filter == null || StringUtils.containsIgnoreCase(group.getName(), filter))
+                .collect(Collectors.toList());
+        if (!groups.isEmpty() && limit > 0) {
+            groups = groups.subList((int) offset, Math.min(groups.size(), (int) (offset + limit)));
+        }
+        groups.forEach(group -> {
+            groupIds.add(group.getName());
+            awsCognitoCacheManager.cacheGroup(getKey(), getSiteKey(), group);
+        });
+        return Collections.unmodifiableList(groupIds);
     }
 
     @Override

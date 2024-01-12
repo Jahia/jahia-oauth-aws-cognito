@@ -119,6 +119,21 @@ public class AwsCognitoCacheManager {
         });
     }
 
+    public Optional<List<AwsCognitoGroup>> getGroups(String providerKey, String siteKey, int offset, int limit, Supplier<Optional<List<AwsCognitoGroup>>> supplier) {
+        String cacheKey = "all_" + offset + "_" + limit;
+        return Optional.ofNullable((List<AwsCognitoGroup>) CacheHelper.getObjectValue(userCache, getCacheNameKey(providerKey, siteKey, cacheKey))).map(Optional::of).orElseGet(() -> {
+            Optional<List<AwsCognitoGroup>> awsCognitoUsers = supplier.get();
+            awsCognitoUsers.ifPresent(users -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Caching users {} in site {}", cacheKey, siteKey);
+                }
+                ModuleClassLoaderAwareCacheEntry cacheEntry = new ModuleClassLoaderAwareCacheEntry(users, MODULE_NAME);
+                userCache.put(new Element(getCacheNameKey(providerKey, siteKey, cacheKey), cacheEntry));
+            });
+            return awsCognitoUsers;
+        });
+    }
+
     public Optional<AwsCognitoGroup> getGroup(String providerKey, String siteKey, String groupname) {
         return Optional.ofNullable((AwsCognitoGroup) CacheHelper.getObjectValue(groupCache, getCacheNameKey(providerKey, siteKey, groupname)));
     }
