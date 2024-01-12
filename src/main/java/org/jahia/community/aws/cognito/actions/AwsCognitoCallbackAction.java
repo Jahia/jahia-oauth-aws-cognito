@@ -88,8 +88,8 @@ public class AwsCognitoCallbackAction extends Action {
                             jahiaSitesService.getSiteByKey(siteKey, systemSession).getHome().getUrl());
                 }
 
+                JCRUserNode jcrUserNode = jahiaUserManagerService.lookupUser((String) httpServletRequest.getAttribute(JahiaAuthConstants.SSO_LOGIN));
                 if (logger.isDebugEnabled()) {
-                    JCRUserNode jcrUserNode = jahiaUserManagerService.lookupUser((String) httpServletRequest.getAttribute(JahiaAuthConstants.SSO_LOGIN));
                     logger.debug("User found: {}", jcrUserNode == null ? null : jcrUserNode.getPath());
                 }
                 // WARN: site query param is mandatory for the SSOValve in jahia-authentication module
