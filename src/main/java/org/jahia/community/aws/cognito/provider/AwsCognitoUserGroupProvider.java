@@ -115,9 +115,10 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
 
         // List of groups this principal belongs to
         String userId = member.getName();
-        Optional<AwsCognitoUser> user = awsCognitoCacheManager.getUser(getKey(), getSiteKey(), userId);
+        Optional<AwsCognitoUser> user = awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId,
+                () -> awsCognitoClientService.getUser(awsCognitoConfiguration, AwsCognitoConstants.SSO_LOGIN, userId));
         if (!user.isPresent()) {
-            logger.warn("Unable to user groups {}", userId);
+            logger.warn("Unable to get membership for user {}", userId);
             return Collections.emptyList();
         }
         if (CollectionUtils.isNotEmpty(user.get().getGroups())) {
