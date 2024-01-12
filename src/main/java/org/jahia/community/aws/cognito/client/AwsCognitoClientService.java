@@ -50,7 +50,7 @@ public class AwsCognitoClientService {
         lock.lock();
         ListUsersRequest request = ListUsersRequest.builder()
                 .userPoolId(awsCognitoConfiguration.getUserPoolId())
-                .filter(filterKey + "^=\"" + filterValue + "\"")
+                .filter(filterKey + "=\"" + filterValue + "\"")
                 .build();
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListUsersResponse response = cognitoIdentityProviderClient.listUsers(request);
@@ -72,13 +72,12 @@ public class AwsCognitoClientService {
         }
     }
 
-    private void getUsersRecursively(AwsCognitoConfiguration awsCognitoConfiguration, List<UserType> users, int offset, int limit, String paginationToken) {
+    public Optional<List<AwsCognitoUser>> getUsers(AwsCognitoConfiguration awsCognitoConfiguration, int limit) {
         lock.lock();
+        List<UserType> users = new ArrayList<>();
         ListUsersRequest.Builder request = ListUsersRequest.builder()
-                .userPoolId(awsCognitoConfiguration.getUserPoolId());
-        if (paginationToken != null) {
-            request.paginationToken(paginationToken);
-        }
+                .userPoolId(awsCognitoConfiguration.getUserPoolId())
+                .limit(limit);
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListUsersResponse response = cognitoIdentityProviderClient.listUsers(request.build());
             if (logger.isDebugEnabled()) {
@@ -86,10 +85,6 @@ public class AwsCognitoClientService {
             }
             if (response.hasUsers() && !CollectionUtils.isEmpty(response.users())) {
                 users.addAll(response.users());
-                paginationToken = response.paginationToken();
-                if (paginationToken != null && (limit == -1 || users.size() <= (offset + limit))) {
-                    getUsersRecursively(awsCognitoConfiguration, users, offset, limit, paginationToken);
-                }
             }
         } catch (Exception e) {
             logger.warn("Unable to get users");
@@ -99,15 +94,10 @@ public class AwsCognitoClientService {
         } finally {
             lock.unlock();
         }
-    }
-
-    public Optional<List<AwsCognitoUser>> getUsers(AwsCognitoConfiguration awsCognitoConfiguration, int offset, int limit) {
-        List<UserType> users = new ArrayList<>();
-        getUsersRecursively(awsCognitoConfiguration, users, offset, limit, null);
         if (users.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(users.stream().map(AwsCognitoUser::new).collect(Collectors.toList())).map(list -> limit == -1 ? list : list.subList(offset, Math.min(list.size(), offset + limit)));
+        return Optional.of(users.stream().map(AwsCognitoUser::new).collect(Collectors.toList()));
     }
 
     private void getGroupMembersRecursively(AwsCognitoConfiguration awsCognitoConfiguration, String groupName, List<UserType> users, String nextToken) {
@@ -175,12 +165,12 @@ public class AwsCognitoClientService {
         }
     }
 
-    private void getGroupsRecursively(AwsCognitoConfiguration awsCognitoConfiguration, List<GroupType> groups, int offset, int limit, String nextToken) {
+    public Optional<List<AwsCognitoGroup>> getGroups(AwsCognitoConfiguration awsCognitoConfiguration, String filter, int limit) {
         lock.lock();
-        ListGroupsRequest.Builder requestBuilder = ListGroupsRequest.builder().userPoolId(awsCognitoConfiguration.getUserPoolId());
-        if (nextToken != null) {
-            requestBuilder.nextToken(nextToken);
-        }
+        List<GroupType> groups = new ArrayList<>();
+        ListGroupsRequest.Builder requestBuilder = ListGroupsRequest.builder()
+                .userPoolId(awsCognitoConfiguration.getUserPoolId())
+                .limit(limit);
         try (CognitoIdentityProviderClient cognitoIdentityProviderClient = getCognitoIdentityProviderClient(awsCognitoConfiguration)) {
             ListGroupsResponse response = cognitoIdentityProviderClient.listGroups(requestBuilder.build());
             if (logger.isDebugEnabled()) {
@@ -188,10 +178,6 @@ public class AwsCognitoClientService {
             }
             if (response.hasGroups() && !CollectionUtils.isEmpty(response.groups())) {
                 groups.addAll(response.groups());
-                nextToken = response.nextToken();
-                if (nextToken != null && (limit == -1 || groups.size() <= (offset + limit))) {
-                    getGroupsRecursively(awsCognitoConfiguration, groups, offset, limit, nextToken);
-                }
             }
         } catch (Exception e) {
             logger.warn("Unable to get groups");
@@ -201,18 +187,13 @@ public class AwsCognitoClientService {
         } finally {
             lock.unlock();
         }
-    }
-
-    public Optional<List<AwsCognitoGroup>> getGroups(AwsCognitoConfiguration awsCognitoConfiguration, String filter, int offset, int limit) {
-        List<GroupType> groups = new ArrayList<>();
-        getGroupsRecursively(awsCognitoConfiguration, groups, offset, -1, null);
         if (groups.isEmpty()) {
             return Optional.empty();
         }
         return Optional.of(groups.stream()
                 .filter(group -> filter == null || StringUtils.containsIgnoreCase(group.groupName(), filter))
                 .map(AwsCognitoGroup::new)
-                .collect(Collectors.toList())).map(list -> limit == -1 ? list : list.subList(offset, Math.min(list.size(), offset + limit)));
+                .collect(Collectors.toList()));
     }
 
     private void getMembershipRecursively(AwsCognitoConfiguration awsCognitoConfiguration, String username, List<GroupType> groups, String nextToken) {

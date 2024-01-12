@@ -21,11 +21,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
     private static final Logger logger = LoggerFactory.getLogger(AwsCognitoUserGroupProvider.class);
@@ -65,43 +63,43 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
     }
 
     @Override
-    public JahiaGroup getGroup(String groupId) throws GroupNotFoundException {
+    public JahiaGroup getGroup(String groupname) throws GroupNotFoundException {
         if (!isAvailable()) {
             throw new GroupNotFoundException();
         }
-        if (JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupId) || JahiaGroupManagerService.POWERFUL_GROUPS.contains(groupId)) {
-            logger.warn("Group {} is protected", groupId);
+        if (JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupname) || JahiaGroupManagerService.POWERFUL_GROUPS.contains(groupname)) {
+            logger.warn("Group {} is protected", groupname);
             return null;
         }
-        return awsCognitoCacheManager.getOrRefreshGroup(getKey(), getSiteKey(), groupId, () -> awsCognitoClientService.getGroup(awsCognitoConfiguration, groupId))
-                .orElseThrow(() -> new GroupNotFoundException("Group '" + groupId + "' not found.")).getJahiaGroup();
+        return awsCognitoCacheManager.getOrRefreshGroup(getKey(), getSiteKey(), groupname, () -> awsCognitoClientService.getGroup(awsCognitoConfiguration, groupname))
+                .orElseThrow(() -> new GroupNotFoundException("Group '" + groupname + "' not found.")).getJahiaGroup();
     }
 
     @Override
-    public List<Member> getGroupMembers(String groupId) {
+    public List<Member> getGroupMembers(String groupname) {
         if (!isAvailable()) {
             throw new JahiaRuntimeException("Service not available");
         }
-        if (JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupId) || JahiaGroupManagerService.POWERFUL_GROUPS.contains(groupId)) {
-            logger.warn("Group {} is protected", groupId);
+        if (JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupname) || JahiaGroupManagerService.POWERFUL_GROUPS.contains(groupname)) {
+            logger.warn("Group {} is protected", groupname);
             return null;
         }
-        // List of members in the groupId
-        Optional<AwsCognitoGroup> group = awsCognitoCacheManager.getGroup(getKey(), getSiteKey(), groupId);
+        // List of members in the groupname
+        Optional<AwsCognitoGroup> group = awsCognitoCacheManager.getGroup(getKey(), getSiteKey(), groupname);
         if (!group.isPresent()) {
-            logger.warn("Unable to get group members {}", groupId);
+            logger.warn("Unable to get group members {}", groupname);
             return Collections.emptyList();
         }
         if (CollectionUtils.isNotEmpty(group.get().getMembers())) {
-            logger.debug("Group member {} are in cache", groupId);
+            logger.debug("Group member {} are in cache", groupname);
             return group.get().getMembers().stream().map(member -> new Member(member, Member.MemberType.USER))
                     .collect(Collectors.toList());
         }
 
         List<Member> members = new ArrayList<>();
-        awsCognitoClientService.getGroupMembers(awsCognitoConfiguration, groupId).orElse(Collections.emptyList())
+        awsCognitoClientService.getGroupMembers(awsCognitoConfiguration, groupname).orElse(Collections.emptyList())
                 .forEach(user -> members.add(new Member(user.getUsername(), Member.MemberType.USER)));
-        awsCognitoCacheManager.getOrRefreshGroup(getKey(), getSiteKey(), groupId, () -> awsCognitoClientService.getGroup(awsCognitoConfiguration, groupId))
+        awsCognitoCacheManager.getOrRefreshGroup(getKey(), getSiteKey(), groupname, () -> awsCognitoClientService.getGroup(awsCognitoConfiguration, groupname))
                 .ifPresent(g -> g.setMembers(members.stream().map(Member::getName).collect(Collectors.toList())));
         return Collections.unmodifiableList(members);
     }
@@ -128,7 +126,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         }
 
         List<String> groups = new ArrayList<>();
-        awsCognitoClientService.getMembership(awsCognitoConfiguration, userId).orElse(Collections.emptyList())
+        awsCognitoClientService.getMembership(awsCognitoConfiguration, (String) user.get().getAttributes().get(AwsCognitoConstants.AWS_USERNAME)).orElse(Collections.emptyList())
                 .forEach(group -> groups.add(group.getName()));
         awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId, () -> awsCognitoClientService.getUser(awsCognitoConfiguration, AwsCognitoConstants.SSO_LOGIN, userId))
                 .ifPresent(u -> u.setGroups(groups));
@@ -145,8 +143,8 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         }
 
         // search one user in the cache by username
-        if (searchCriteria.containsKey(PROP_USERNAME) && searchCriteria.size() == 1 && !searchCriteria.getProperty(PROP_USERNAME).contains("*")) {
-            String userId = searchCriteria.getProperty(PROP_USERNAME);
+        if (searchCriteria.size() == 1 && (searchCriteria.containsKey(PROP_USERNAME) || searchCriteria.containsKey("*"))) {
+            String userId = StringUtils.defaultString(searchCriteria.getProperty(PROP_USERNAME), searchCriteria.getProperty("*")).replace("*", "");
             return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), userId,
                             () -> awsCognitoClientService.getUser(awsCognitoConfiguration, AwsCognitoConstants.SSO_LOGIN, userId))
                     .map(awsCognitoUser -> Collections.singletonList(awsCognitoUser.getUsername()))
@@ -155,42 +153,15 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
 
         // search one user in the cache by email
         if (searchCriteria.containsKey(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL)) {
-            String email = searchCriteria.getProperty(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL);
+            String email = searchCriteria.getProperty(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL).replace("*", "");
             return awsCognitoCacheManager.getOrRefreshUser(getKey(), getSiteKey(), email,
-                            () -> awsCognitoClientService.getUser(awsCognitoConfiguration, AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL, email.replace("*", "")))
+                            () -> awsCognitoClientService.getUser(awsCognitoConfiguration, AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL, email))
                     .map(awsCognitoUser -> Collections.singletonList(awsCognitoUser.getUsername()))
                     .orElse(Collections.emptyList());
         }
 
-        int iOffset = (int) offset;
-        int iLimit = (int) limit;
-        Optional<List<AwsCognitoUser>> awsCognitoUsers;
-        if (searchCriteria.isEmpty()) {
-            // cache user with offset and limit
-            awsCognitoUsers = awsCognitoCacheManager.getUsers(getKey(), getSiteKey(), iOffset, iLimit,
-                    () -> awsCognitoClientService.getUsers(awsCognitoConfiguration, iOffset, iLimit));
-        } else {
-            // cache all users
-            awsCognitoUsers = awsCognitoCacheManager.getUsers(getKey(), getSiteKey(), iOffset, -1,
-                            () -> awsCognitoClientService.getUsers(awsCognitoConfiguration, iOffset, -1))
-                    .map(l -> {
-                        Stream<AwsCognitoUser> users = l.stream();
-                        if (searchCriteria.containsKey("*")) {
-                            String search = searchCriteria.getProperty("*").replace("*", "");
-                            users = users.filter(user -> StringUtils.contains(user.getUsername(), search) ||
-                                    user.getAttributes().values().stream()
-                                            .anyMatch(attribute -> StringUtils.containsIgnoreCase(attribute.toString(), search)));
-                        } else {
-                            for (Map.Entry<Object, Object> entry : searchCriteria.entrySet()) {
-                                users = users.filter(user -> user.getAttributes().containsKey(entry.getKey().toString()) &&
-                                        StringUtils.containsIgnoreCase(user.getAttributes().get(entry.getKey().toString()).toString(),
-                                                entry.getValue().toString().replace("*", "")));
-                            }
-                        }
-                        return users.collect(Collectors.toList());
-                    }).map(list -> limit == -1 ? list : list.subList(iOffset, Math.min(list.size(), iOffset + iLimit)));
-        }
-        return awsCognitoUsers.orElse(Collections.emptyList()).stream().map(AwsCognitoUser::getUsername).collect(Collectors.toList());
+        logger.warn("Search users is disabled");
+        return Collections.emptyList();
     }
 
     @Override
@@ -214,24 +185,8 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
                     .orElse(Collections.emptyList());
         }
 
-        Optional<List<AwsCognitoGroup>> awsCognitoGroups;
-        if (searchCriteria.containsKey("*")) {
-            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, searchCriteria.getProperty("*").replace("*", ""), (int) offset, (int) limit);
-        } else if (searchCriteria.isEmpty()) {
-            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, null, (int) offset, (int) limit);
-        } else if (searchCriteria.containsKey(PROP_GROUPNAME)) {
-            awsCognitoGroups = awsCognitoClientService.getGroups(awsCognitoConfiguration, searchCriteria.getProperty(PROP_GROUPNAME).replace("*", ""), (int) offset, (int) limit);
-        } else {
-            logger.warn("Unable to search groups multiple attributes");
-            awsCognitoGroups = Optional.empty();
-        }
-        List<String> groupIds = new ArrayList<>();
-        awsCognitoGroups.orElse(Collections.emptyList())
-                .forEach(group -> {
-                    groupIds.add(group.getName());
-                    awsCognitoCacheManager.cacheGroup(getKey(), getSiteKey(), group);
-                });
-        return Collections.unmodifiableList(groupIds);
+        logger.warn("Search groups is disabled");
+        return Collections.emptyList();
     }
 
     @Override

@@ -31,6 +31,7 @@ public class AwsCognitoUser implements Serializable {
             }
             throw new RuntimeException("User not found");
         }
+        attributes.put(AwsCognitoConstants.AWS_USERNAME, awsUser.username());
         username = (String) attributes.get(AwsCognitoConstants.SSO_LOGIN);
         if (attributes.containsKey(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL)) {
             attributes.put(AwsCognitoConstants.USER_PROPERTY_EMAIL, attributes.get(AwsCognitoConstants.CUSTOM_PROPERTY_EMAIL));
