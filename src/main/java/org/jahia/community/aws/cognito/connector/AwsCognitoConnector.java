@@ -21,12 +21,8 @@ import java.util.List;
 public class AwsCognitoConnector implements OAuthConnectorService {
     private static final Logger logger = LoggerFactory.getLogger(AwsCognitoConnector.class);
 
-    private JahiaOAuthService jahiaOAuthService;
-
     @Reference
-    private void setJahiaOAuthService(JahiaOAuthService jahiaOAuthService) {
-        this.jahiaOAuthService = jahiaOAuthService;
-    }
+    private JahiaOAuthService jahiaOAuthService;
 
     @Activate
     private void onActivate() {
@@ -42,16 +38,16 @@ public class AwsCognitoConnector implements OAuthConnectorService {
 
     @Override
     public String getProtectedResourceUrl(ConnectorConfig connectorConfig) {
-        return connectorConfig.getProperty(AwsCognitoConstants.ENDPOINT) + "/oauth2/userinfo";
+        return null;
+    }
+
+    @Override
+    public List<String> getProtectedResourceUrls(ConnectorConfig config) {
+        return Collections.emptyList();
     }
 
     @Override
     public List<ConnectorPropertyInfo> getAvailableProperties() {
-        return Collections.singletonList(new ConnectorPropertyInfo(AwsCognitoConstants.SSO_LOGIN, "string"));
-    }
-
-    @Override
-    public void validateSettings(ConnectorConfig connectorConfig) {
-        // Do nothing
+        return Collections.emptyList();
     }
 }

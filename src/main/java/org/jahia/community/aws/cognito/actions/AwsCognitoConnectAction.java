@@ -23,18 +23,10 @@ import java.util.Map;
 public class AwsCognitoConnectAction extends Action {
     private static final String NAME = "connectToAwsCognitoAction";
 
+    @Reference
     private SettingsService settingsService;
+    @Reference
     private JahiaOAuthService jahiaOAuthService;
-
-    @Reference
-    private void setSettingsService(SettingsService settingsService) {
-        this.settingsService = settingsService;
-    }
-
-    @Reference
-    private void setJahiaOAuthService(JahiaOAuthService jahiaOAuthService) {
-        this.jahiaOAuthService = jahiaOAuthService;
-    }
 
     public AwsCognitoConnectAction() {
         setName(NAME);
