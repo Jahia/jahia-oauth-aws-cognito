@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -65,8 +66,15 @@ public class AwsCognitoCallbackAction extends Action {
             try {
                 String siteKey = renderContext.getSite().getSiteKey();
                 ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConstants.CONNECTOR_KEY);
-                jahiaOAuthService.extractAccessTokenAndExecuteMappers(connectorConfig, token, httpServletRequest.getRequestedSessionId());
-                jahiaAuthMapperService.cacheMapperResults("cognito-mapper", httpServletRequest.getRequestedSessionId(), Collections.singletonMap(JahiaAuthConstants.SSO_LOGIN, new MappedProperty(null, httpServletRequest.getAttribute(JahiaAuthConstants.SSO_LOGIN))));
+                // invalide http session
+                httpServletRequest.getSession(false).invalidate();
+                // renew http session
+                HttpSession session = httpServletRequest.getSession();
+                // decode openid token
+                jahiaOAuthService.extractAccessTokenAndExecuteMappers(connectorConfig, token, session.getId());
+                // cache username
+                jahiaAuthMapperService.cacheMapperResults("cognito-mapper", session.getId(), Collections.singletonMap(JahiaAuthConstants.SSO_LOGIN, new MappedProperty(null, httpServletRequest.getAttribute(JahiaAuthConstants.SSO_LOGIN))));
+                // redirect
                 String returnUrl = (String) httpServletRequest.getSession(false).getAttribute(AwsCognitoConstants.SESSION_OAUTH_AWS_COGNITO_RETURN_URL);
                 if (StringUtils.isBlank(returnUrl)) {
                     returnUrl = jcrTemplate.doExecuteWithSystemSessionAsUser(null, renderContext.getWorkspace(), renderContext.getMainResourceLocale(), systemSession ->
