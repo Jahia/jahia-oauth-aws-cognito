@@ -8,6 +8,9 @@ import org.jahia.bin.ActionResult;
 import org.jahia.bin.Render;
 import org.jahia.community.aws.cognito.api.AwsCognitoConstants;
 import org.jahia.modules.jahiaauth.service.ConnectorConfig;
+import org.jahia.modules.jahiaauth.service.JahiaAuthConstants;
+import org.jahia.modules.jahiaauth.service.JahiaAuthMapperService;
+import org.jahia.modules.jahiaauth.service.MappedProperty;
 import org.jahia.modules.jahiaauth.service.SettingsService;
 import org.jahia.modules.jahiaoauth.service.JahiaOAuthService;
 import org.jahia.services.content.JCRSessionWrapper;
@@ -22,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +37,8 @@ public class AwsCognitoCallbackAction extends Action {
 
     @Reference
     private JahiaOAuthService jahiaOAuthService;
+    @Reference
+    private JahiaAuthMapperService jahiaAuthMapperService;
     @Reference
     private SettingsService settingsService;
     @Reference
@@ -60,6 +66,7 @@ public class AwsCognitoCallbackAction extends Action {
                 String siteKey = renderContext.getSite().getSiteKey();
                 ConnectorConfig connectorConfig = settingsService.getConnectorConfig(siteKey, AwsCognitoConstants.CONNECTOR_KEY);
                 jahiaOAuthService.extractAccessTokenAndExecuteMappers(connectorConfig, token, httpServletRequest.getRequestedSessionId());
+                jahiaAuthMapperService.cacheMapperResults("cognito-mapper", httpServletRequest.getRequestedSessionId(), Collections.singletonMap(JahiaAuthConstants.SSO_LOGIN, new MappedProperty(null, httpServletRequest.getAttribute(JahiaAuthConstants.SSO_LOGIN))));
                 String returnUrl = (String) httpServletRequest.getSession(false).getAttribute(AwsCognitoConstants.SESSION_OAUTH_AWS_COGNITO_RETURN_URL);
                 if (StringUtils.isBlank(returnUrl)) {
                     returnUrl = jcrTemplate.doExecuteWithSystemSessionAsUser(null, renderContext.getWorkspace(), renderContext.getMainResourceLocale(), systemSession ->
