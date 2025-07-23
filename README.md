@@ -31,3 +31,13 @@ This module is a community module to show how to implement an authentication bas
     - `scope`: AWS scope (openid profile email)
     - `callbackUrl`: AWS callback URL
     - `logoutCallbackUrl`: AWS logout callback URL
+
+## AWS Configuration
+### User Group Provider
+You need to set up some permissions in AWS Cognito : `cognito-idp:ListGroups`, `cognito-idp:ListUsers`, `cognito-idp:ListUsersInGroup`
+Those permissions are in *Pool Cognito* resource.
+### User profile
+Calling `ListUser` or `ListUsersInGroup`, by default, you get all profile properties ; except if you specified `AttributsToGet` in your request.
+[Documentation](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_ListUsers.html)
+### Authentication
+You need to set up **OAuth flow**.
