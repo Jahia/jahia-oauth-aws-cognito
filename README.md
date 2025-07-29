@@ -30,6 +30,7 @@ This module is a community module to show how to implement an authentication bas
     - `endpoint`: AWS endpoint
     - `scope`: AWS scope (openid profile email)
     - `callbackUrl`: AWS callback URL
+    - `logoutAWS`: Enable AWS logout
     - `logoutCallbackUrl`: AWS logout callback URL
 
 ## AWS Configuration

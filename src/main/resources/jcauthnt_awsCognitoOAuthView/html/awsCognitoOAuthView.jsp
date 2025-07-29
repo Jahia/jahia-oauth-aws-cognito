@@ -68,6 +68,7 @@
                 <md-input-container flex>
                     <label message-key="label.endpoint"></label>
                     <input type="text" ng-model="awsCognito.endpoint" name="endpoint"/>
+                    <div class="hint" message-key="hint.endpoint"></div>
                     <div ng-messages="awsCognitoForm.endpoint.$error" role="alert">
                         <div ng-message="required" message-key="error.endpoint.required"></div>
                     </div>
@@ -87,15 +88,20 @@
                 <md-input-container flex>
                     <label message-key="label.callbackUrl"></label>
                     <input type="text" ng-model="awsCognito.callbackUrl" name="callbackUrl"/>
+                    <div class="hint" message-key="hint.callbackUrl"></div>
                     <div ng-messages="awsCognitoForm.callbackUrl.$error" role="alert">
                         <div ng-message="required" message-key="error.callbackUrl.required"></div>
                     </div>
                 </md-input-container>
             </div>
-            <div layout="row">
+            <md-switch ng-model="awsCognito.logoutAWS">
+                <span message-key="label.logoutAWS"></span>
+            </md-switch>
+            <div layout="row" ng-show="awsCognito.logoutAWS">
                 <md-input-container flex>
                     <label message-key="label.logoutCallbackUrl"></label>
                     <input type="text" ng-model="awsCognito.logoutCallbackUrl" name="logoutCallbackUrl"/>
+                    <div class="hint" message-key="hint.logoutCallbackUrl"></div>
                 </md-input-container>
             </div>
         </form>

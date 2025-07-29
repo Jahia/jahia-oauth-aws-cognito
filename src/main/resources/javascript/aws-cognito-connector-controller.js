@@ -28,6 +28,7 @@
                     endpoint: vm.endpoint,
                     scope: vm.scope,
                     callbackUrl: vm.callbackUrl,
+                    logoutAWS: vm.logoutAWS,
                     logoutCallbackUrl: vm.logoutCallbackUrl
                 }
             }).success(() => {
@@ -42,7 +43,7 @@
             vm.expandedCard = !vm.expandedCard;
         };
 
-        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'scope', 'callbackUrl', 'logoutCallbackUrl']).success(data => {
+        settingsService.getConnectorData('AwsCognitoApi20', ['enabled', 'apiKey', 'apiSecret', 'endpoint', 'scope', 'callbackUrl', 'logoutAWS', 'logoutCallbackUrl']).success(data => {
             if (data && !angular.equals(data, {})) {
                 vm.connectorHasSettings = true;
                 vm.expandedCard = true;
@@ -52,6 +53,7 @@
                 vm.endpoint = data.endpoint;
                 vm.scope = data.scope;
                 vm.callbackUrl = data.callbackUrl;
+                vm.logoutAWS = data.logoutAWS === 'true';
                 vm.logoutCallbackUrl = data.logoutCallbackUrl;
             } else {
                 vm.connectorHasSettings = false;
