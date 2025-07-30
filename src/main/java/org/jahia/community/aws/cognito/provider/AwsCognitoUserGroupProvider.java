@@ -68,7 +68,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
             throw new GroupNotFoundException();
         }
         if (JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupname) || JahiaGroupManagerService.POWERFUL_GROUPS.contains(groupname)) {
-            logger.warn("Group {} is protected", groupname);
+            logger.debug("Group {} is protected", groupname);
             return null;
         }
         return awsCognitoCacheManager.getOrRefreshGroup(getKey(), getSiteKey(), groupname, () -> awsCognitoClientService.getGroup(awsCognitoConfiguration, groupname))
@@ -81,7 +81,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
             throw new JahiaRuntimeException("Service not available");
         }
         if (JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupname) || JahiaGroupManagerService.POWERFUL_GROUPS.contains(groupname)) {
-            logger.warn("Group {} is protected", groupname);
+            logger.debug("Group {} is protected", groupname);
             return null;
         }
         // List of members in the groupname
@@ -178,7 +178,7 @@ public class AwsCognitoUserGroupProvider extends BaseUserGroupProvider {
         if (searchCriteria.containsKey(PROP_GROUPNAME) && searchCriteria.size() == 1 && !searchCriteria.getProperty(PROP_GROUPNAME).contains("*")) {
             String groupId = searchCriteria.getProperty(PROP_GROUPNAME);
             if (JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupId) || JahiaGroupManagerService.POWERFUL_GROUPS.contains(groupId)) {
-                logger.warn("Group {} is protected", groupId);
+                logger.debug("Group {} is protected", groupId);
                 return Collections.emptyList();
             }
             return awsCognitoCacheManager.getOrRefreshGroup(getKey(), getSiteKey(), groupId, () -> awsCognitoClientService.getGroup(awsCognitoConfiguration, groupId))
