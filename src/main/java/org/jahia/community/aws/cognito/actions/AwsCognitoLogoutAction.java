@@ -20,8 +20,13 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component(service = Action.class)
 public class AwsCognitoLogoutAction extends Action {
@@ -44,15 +49,18 @@ public class AwsCognitoLogoutAction extends Action {
         try {
             String siteKey = renderContext.getSite().getSiteKey();
 
-            String returnUrl = (String) httpServletRequest.getSession(false).getAttribute(AwsCognitoConstants.SESSION_OAUTH_AWS_COGNITO_RETURN_URL);
-            if (StringUtils.isBlank(returnUrl)) {
-                returnUrl = jcrTemplate.doExecuteWithSystemSessionAsUser(null, renderContext.getWorkspace(), renderContext.getMainResourceLocale(), systemSession ->
-                        jahiaSitesService.getSiteByKey(siteKey, systemSession).getHome().getUrl());
+            AtomicReference<String> returnUrl = new AtomicReference<>();
+            Arrays.stream(httpServletRequest.getCookies()).filter(cookie -> AwsCognitoConstants.SESSION_OAUTH_AWS_COGNITO_RETURN_URL.equals(cookie.getName()))
+                    .findFirst()
+                    .ifPresent(cookie -> returnUrl.set(cookie.getValue()));
+            if (StringUtils.isBlank(returnUrl.get())) {
+                returnUrl.set(jcrTemplate.doExecuteWithSystemSessionAsUser(null, renderContext.getWorkspace(), renderContext.getMainResourceLocale(), systemSession ->
+                        jahiaSitesService.getSiteByKey(siteKey, systemSession).getHome().getUrl()));
             }
 
             String logoutUrl = Logout.getLogoutServletPath();
-            if (StringUtils.isNotBlank(returnUrl)) {
-                logoutUrl += "?redirect=" + returnUrl;
+            if (StringUtils.isNotBlank(returnUrl.get())) {
+                logoutUrl += "?redirect=" + URLEncoder.encode(returnUrl.get(), StandardCharsets.UTF_8.name());
             }
 
             if (logger.isDebugEnabled()) {
@@ -60,7 +68,7 @@ public class AwsCognitoLogoutAction extends Action {
             }
 
             return new ActionResult(HttpServletResponse.SC_OK, logoutUrl, true, null);
-        } catch (RepositoryException e) {
+        } catch (UnsupportedEncodingException | RepositoryException e) {
             logger.error("", e);
         }
         return ActionResult.BAD_REQUEST;

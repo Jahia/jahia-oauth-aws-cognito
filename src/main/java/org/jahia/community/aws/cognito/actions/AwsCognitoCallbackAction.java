@@ -26,9 +26,11 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component(service = Action.class)
 public class AwsCognitoCallbackAction extends Action {
@@ -75,13 +77,16 @@ public class AwsCognitoCallbackAction extends Action {
                 // cache username
                 jahiaAuthMapperService.cacheMapperResults("cognito-mapper", session.getId(), Collections.singletonMap(JahiaAuthConstants.SSO_LOGIN, new MappedProperty(null, httpServletRequest.getAttribute(JahiaAuthConstants.SSO_LOGIN))));
                 // redirect
-                String returnUrl = (String) httpServletRequest.getSession(false).getAttribute(AwsCognitoConstants.SESSION_OAUTH_AWS_COGNITO_RETURN_URL);
-                if (StringUtils.isBlank(returnUrl)) {
-                    returnUrl = jcrTemplate.doExecuteWithSystemSessionAsUser(null, renderContext.getWorkspace(), renderContext.getMainResourceLocale(), systemSession ->
-                            jahiaSitesService.getSiteByKey(siteKey, systemSession).getHome().getUrl());
+                AtomicReference<String> returnUrl = new AtomicReference<>();
+                Arrays.stream(httpServletRequest.getCookies()).filter(cookie -> AwsCognitoConstants.SESSION_OAUTH_AWS_COGNITO_RETURN_URL.equals(cookie.getName()))
+                        .findFirst()
+                        .ifPresent(cookie -> returnUrl.set(cookie.getValue()));
+                if (StringUtils.isBlank(returnUrl.get())) {
+                    returnUrl.set(jcrTemplate.doExecuteWithSystemSessionAsUser(null, renderContext.getWorkspace(), renderContext.getMainResourceLocale(), systemSession ->
+                            jahiaSitesService.getSiteByKey(siteKey, systemSession).getHome().getUrl()));
                 }
                 // WARN: site query param is mandatory for the SSOValve in jahia-authentication module
-                return new ActionResult(HttpServletResponse.SC_OK, returnUrl + "?site=" + siteKey, true, null);
+                return new ActionResult(HttpServletResponse.SC_OK, returnUrl.get() + "?site=" + siteKey, true, null);
             } catch (Exception e) {
                 logger.error("", e);
             }

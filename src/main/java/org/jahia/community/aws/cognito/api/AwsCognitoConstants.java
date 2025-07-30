@@ -76,7 +76,7 @@ public final class AwsCognitoConstants {
                 logoutUrl = String.format(LOGOUT_URL,
                         connectorConfig.getProperty(ENDPOINT),
                         connectorConfig.getProperty(JahiaOAuthConstants.PROPERTY_API_KEY),
-                        URLEncoder.encode(connectorConfig.getProperty(LOGOUT_CALLBACK_URL), StandardCharsets.UTF_8.toString()));
+                        URLEncoder.encode(connectorConfig.getProperty(LOGOUT_CALLBACK_URL), StandardCharsets.UTF_8.name()));
             } catch (Exception e) {
                 if (logger.isDebugEnabled()) {
                     logger.error("", e);
